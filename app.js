@@ -877,15 +877,17 @@ function pika(cx, by, H = 280, wink = false) {
        <ellipse cx="58" cy="-112" rx="17" ry="22" fill="${Y}" stroke="${YS}" stroke-width="3" transform="rotate(25 58 -112)"/>`
     : `<ellipse cx="-36" cy="-70" rx="15" ry="22" fill="${Y}" stroke="${YS}" stroke-width="3" transform="rotate(20 -36 -70)"/>
        <ellipse cx="36" cy="-70" rx="15" ry="22" fill="${Y}" stroke="${YS}" stroke-width="3" transform="rotate(-20 36 -70)"/>`;
+  const ear = d => {
+    const X = v => v * d;  // 좌우 대칭
+    return `<path d="M${X(50)} -186 C ${X(70)} -222, ${X(82)} -250, ${X(88)} -266 C ${X(94)} -284, ${X(76)} -290, ${X(66)} -278 C ${X(52)} -258, ${X(36)} -232, ${X(18)} -208 Z" fill="${Y}" stroke="${YS}" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M${X(80)} -246 C ${X(86)} -258, ${X(90)} -264, ${X(88)} -270 C ${X(86)} -284, ${X(74)} -286, ${X(66)} -278 C ${X(62)} -272, ${X(58)} -266, ${X(56)} -262 C ${X(64)} -252, ${X(72)} -246, ${X(80)} -246 Z" fill="${INK}"/>`;
+  };
   return `<g class="pika" data-tip="피카츄 인형" transform="translate(${cx} ${by}) scale(${k})">
     <ellipse cx="0" cy="0" rx="78" ry="10" fill="#000" opacity=".12"/>
     <!-- 꼬리 -->
     <path d="M58 -40 l40 -30 l-14 -6 l34 -40 l-46 26 l12 8 l-40 26z" fill="${Y}" stroke="${YS}" stroke-width="3" stroke-linejoin="round"/>
-    <!-- 귀 -->
-    <path d="M-44 -192 L-96 -282 L-20 -214 Z" fill="${Y}" stroke="${YS}" stroke-width="3" stroke-linejoin="round"/>
-    <path d="M-78 -251 L-96 -282 L-66 -258 Z" fill="${INK}"/>
-    <path d="M44 -192 L${wink ? 108 : 96} -282 L20 -214 Z" fill="${Y}" stroke="${YS}" stroke-width="3" stroke-linejoin="round"/>
-    <path d="M${wink ? 88 : 78} -251 L${wink ? 108 : 96} -282 L66 -258 Z" fill="${INK}"/>
+    <!-- 귀 (끝이 둥근 뭉툭한 모양) -->
+    ${ear(-1)}${ear(1)}
     <!-- 몸 -->
     <ellipse cx="0" cy="-58" rx="62" ry="58" fill="${Y}" stroke="${YS}" stroke-width="3"/>
     <ellipse cx="-34" cy="-6" rx="26" ry="12" fill="${Y}" stroke="${YS}" stroke-width="3"/>
@@ -999,7 +1001,7 @@ function sinkSVG() {
     </g>
   </g>`;
   [[950, 'left'], [1340, 'right'], [1730, 'left'], [2120, 'right']].forEach(([x, hg], i) =>
-    s += swing(x, UT, 390, UB - UT, hg, `상부장 780 (${i < 2 ? '좌' : '우'})`, inside(x, UT, 390, UB - UT, x === 1730 ? 'upper-pika' : 'upper')));
+    s += swing(x, UT, 390, UB - UT, hg, `상부장 780 (${i < 2 ? '좌' : '우'})`, inside(x, UT, 390, UB - UT, (x === 1730 || x === 950) ? 'upper-pika' : 'upper')));
 
   // 키큰장 (하부 150 띄움 → 로봇청소기)
   s += swing(2510, UT, 450, 1070, 'right', '키큰장 450', inside(2510, UT, 450, 1070, 'tall'));
