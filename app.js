@@ -807,6 +807,7 @@ const DEFS = `<defs>
   <linearGradient id="panel" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#f6f5f2"/><stop offset=".55" stop-color="#eeede9"/><stop offset="1" stop-color="#e6e4e0"/></linearGradient>
   <linearGradient id="topShade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5a4f45" stop-opacity=".22"/><stop offset="1" stop-color="#5a4f45" stop-opacity="0"/></linearGradient>
   <linearGradient id="shelfShade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5a4f45" stop-opacity=".14"/><stop offset="1" stop-color="#5a4f45" stop-opacity="0"/></linearGradient>
+  <linearGradient id="hoodLight" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff2cf" stop-opacity=".85"/><stop offset=".6" stop-color="#fff2cf" stop-opacity=".25"/><stop offset="1" stop-color="#fff2cf" stop-opacity="0"/></linearGradient>
   <radialGradient id="heat"><stop offset="0" stop-color="#ffb347"/><stop offset=".55" stop-color="#ff5a2a"/><stop offset="1" stop-color="#c81e0a" stop-opacity="0"/></radialGradient>
   <linearGradient id="waterG" x1="0" y1="0" x2="0" y2="1">
     <stop offset="0" stop-color="#d7eefa" stop-opacity=".95"/><stop offset="1" stop-color="#a9d6ee" stop-opacity=".55"/>
@@ -928,10 +929,28 @@ function sinkSVG() {
   s += box(0, UT, 50, UB - UT, 'door', '필러 FA 50');
   s += swing(50, UT, 450, 390, 'left', '후드장 900', inside(50, UT, 450, 390, 'upper'));
   s += swing(500, UT, 450, 390, 'right', '후드장 900', inside(500, UT, 450, 390, 'upper'));
-  s += `<g class="mod" data-tip="레인지후드">
-    <path class="fill steel" d="M110 ${UT + 390}H890L850 ${UT + 560}H150Z" style="--d:${nd()}s"/>
-    ${ol(`M110 ${UT + 390}H890L850 ${UT + 560}H150Z`)}
-    <rect class="fill dark" x="170" y="${UT + 540}" width="660" height="20" style="--d:${nd(0)}s"/></g>`;
+  const HB = UT + 560; // 후드 하단
+  let air = '', puffs = '';
+  [[260, -1], [360, -0.6], [470, -0.2], [560, 0.2], [660, 0.6], [760, 1]].forEach(([x0, dir], k) => {
+    air += `<path d="M${x0} ${CT - 30} C ${x0 + dir * 40} ${CT - 300}, ${500 + dir * 260} ${HB + 320}, ${500 + dir * 230} ${HB + 30}" style="animation-delay:${-k * 0.27}s"/>`;
+  });
+  [[330, 0], [450, .7], [560, 1.4], [680, .35], [400, 1.05], [620, 1.75]].forEach(([x0, dl]) => {
+    puffs += `<circle cx="${x0}" cy="${CT - 40}" r="${26 + (x0 % 3) * 6}" style="animation-delay:${dl}s"/>`;
+  });
+  s += `<g class="hood hot" data-act="toggle" data-tip="레인지후드 — 눌러서 켜기">
+    <path class="hood-light" d="M190 ${HB}H810L930 ${CT - 6}H70Z" fill="url(#hoodLight)"/>
+    <g class="hood-air">${air}</g>
+    <g class="hood-puff">${puffs}</g>
+    <path class="fill steel" d="M110 ${UT + 390}H890L850 ${HB}H150Z" style="--d:${nd()}s"/>
+    ${ol(`M110 ${UT + 390}H890L850 ${HB}H150Z`)}
+    <rect class="fill dark" x="170" y="${HB - 20}" width="660" height="20" style="--d:${nd(0)}s"/>
+    <g class="fill" style="--d:${nd(0)}s">
+      <rect class="hood-lamp" x="250" y="${HB - 16}" width="90" height="12" rx="6"/>
+      <rect class="hood-lamp" x="660" y="${HB - 16}" width="90" height="12" rx="6"/>
+      <g class="hood-fan" transform="translate(500 ${HB - 95})"><circle r="44" fill="#8f8d89"/><path d="M0 -36 Q 18 -14 0 0 Q -18 -14 0 -36Z M36 0 Q 14 18 0 0 Q 14 -18 36 0Z M0 36 Q -18 14 0 0 Q 18 14 0 36Z M-36 0 Q -14 -18 0 0 Q -14 18 -36 0Z" fill="#5d5b58"/><circle r="8" fill="#3a3532"/></g>
+      <rect x="760" y="${UT + 440}" width="40" height="16" rx="5" fill="#3a3532"/><circle class="hood-led" cx="780" cy="${UT + 448}" r="5"/>
+    </g>
+  </g>`;
   [[950, 'left'], [1340, 'right'], [1730, 'left'], [2120, 'right']].forEach(([x, hg], i) =>
     s += swing(x, UT, 390, UB - UT, hg, `상부장 780 (${i < 2 ? '좌' : '우'})`, inside(x, UT, 390, UB - UT, 'upper')));
 
@@ -1279,7 +1298,7 @@ const SPECS = {
   render: [['안내', '이전 시안 렌더링'], ['기준', '최신 도면 우선'], ['상판', '크레모사로 변경'], ['도어', '듄 선셋 스톤으로 변경']],
 };
 const HINTS = {
-  sink: '도어 · 서랍 · 대리석 벽체(조명) · 싱크볼(물) · 로봇청소기를 눌러보세요',
+  sink: '도어 · 서랍 · 레인지후드 · 대리석 벽체(조명) · 싱크볼(물) · 로봇청소기를 눌러보세요',
   plan: '인덕션(불) · 싱크볼(물) · 로봇청소기를 눌러보세요',
   builtin: 'ㄱ자 팬트리장 · 냉장고 · 김치냉장고 · 브릿지장 · 밥솥 슬라이드장을 눌러보세요',
   render: '',
@@ -1303,13 +1322,16 @@ $('#stage').addEventListener('click', e => {
     const sw = t.dataset.act === 'toggle-k' ? t.closest('svg').querySelector(`.sw[data-k="${t.dataset.k}"]`) : t;
     if (!sw) return;
     if (!sw.classList.contains('open') && sw.matches('.sw[data-hinge="left"], .sw[data-hinge="right"]')) {
-      sw.parentNode.appendChild(sw);     // 열리는 문을 다른 문들 위로
-      void sw.getBoundingClientRect();   // 이동 후 스타일 확정 → 전환 애니메이션 유지
+      // 이 문보다 뒤에 그려지는 '닫힌 채 멈춰 있는' 문들을 이 문 앞으로 옮겨서, 열린 문이 위에 보이게 함
+      let n = sw.nextElementSibling;
+      const later = [];
+      while (n) { if (n.matches('.sw') && !n.classList.contains('open') && !n.classList.contains('moving')) later.push(n); n = n.nextElementSibling; }
+      later.forEach(el => sw.parentNode.insertBefore(el, sw));
     }
-    requestAnimationFrame(() => {
-      const on = sw.classList.toggle('open');
-      sw.closest('svg').querySelector(`.inside[data-k="${sw.dataset.k}"]`)?.classList.toggle('open', on);
-    });
+    const on = sw.classList.toggle('open');
+    sw.classList.add('moving');
+    clearTimeout(sw._mv); sw._mv = setTimeout(() => sw.classList.remove('moving'), 1900);
+    sw.closest('svg').querySelector(`.inside[data-k="${sw.dataset.k}"]`)?.classList.toggle('open', on);
   }
   else if (t.dataset.act === 'robot') { t.classList.remove('go'); void t.getBoundingClientRect(); t.classList.add('go'); }
 });

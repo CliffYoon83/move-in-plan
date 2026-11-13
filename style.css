@@ -305,7 +305,7 @@ details.lines tr.neg td:last-child{color:#b4553f}
 .dw .shelf{fill:#e7e1d7;stroke:#d3cbbf;stroke-width:2}
 .dw .ware{fill:#efe9df}
 .dw .ware2{fill:#cfc7ba}
-.dw .leaf{transform-box:fill-box;transition:transform 1.6s cubic-bezier(.33,1,.68,1);will-change:transform}
+.dw .leaf{transform-box:fill-box;transition:transform 1.8s cubic-bezier(.37,0,.63,1);will-change:transform}
 .dw .sw[data-hinge="left"] .leaf{transform-origin:left center}
 .dw .sw[data-hinge="right"] .leaf{transform-origin:right center}
 .dw .sw[data-hinge="top"] .leaf{transform-origin:center top}
@@ -314,14 +314,14 @@ details.lines tr.neg td:last-child{color:#b4553f}
 .dw .sw[data-hinge="right"]:not(.open):hover .leaf{transform:perspective(5000px) rotateY(-7deg)}
 .dw .sw.open[data-hinge="left"] .leaf{transform:perspective(9000px) rotateY(-115deg)}
 .dw .sw.open[data-hinge="right"] .leaf{transform:perspective(9000px) rotateY(-115deg)}
-/* 90°를 지나는 순간 앞면 ↔ 안쪽 면 교체 (ease-out 1.6s 기준: 열 때 0.64s, 닫을 때 0.12s 지점) */
-.dw .face-f,.dw .face-b{transition:opacity 0s linear .12s}
+/* 90°를 지나는 순간 앞면 ↔ 안쪽 면 교체 (ease-in-out 1.8s 기준: 열 때 1.24s, 닫을 때 0.56s 지점) */
+.dw .face-f,.dw .face-b{transition:opacity 0s linear .56s}
 .dw .face-b{opacity:0}
-.dw .sw.open .face-b{opacity:1;transition-delay:.64s}
-.dw .sw.open[data-hinge="left"] .face-f,.dw .sw.open[data-hinge="right"] .face-f{opacity:0;transition-delay:.64s}
+.dw .sw.open .face-b{opacity:1;transition-delay:1.24s}
+.dw .sw.open[data-hinge="left"] .face-f,.dw .sw.open[data-hinge="right"] .face-f{opacity:0;transition-delay:1.24s}
 /* 문 안쪽은 처음엔 어둡다가 문이 열리는 만큼 서서히 밝아짐 */
 .dw .in-dim{fill:#2a2420;opacity:.6;transition:opacity .5s ease}
-.dw .inside.open .in-dim{opacity:0;transition:opacity 1.5s cubic-bezier(.5,0,.5,1)}
+.dw .inside.open .in-dim{opacity:0;transition:opacity 1.8s cubic-bezier(.6,0,.4,1)}
 .dw .sw .mod:hover{filter:none}
 .dw .sw.open[data-hinge="top"] .leaf{transform:perspective(6000px) rotateX(78deg)}
 .dw .sw.open[data-hinge="slide"] .leaf{transform:scaleX(.07)}
@@ -423,3 +423,25 @@ details.lines tr.neg td:last-child{color:#b4553f}
 
 .dw .fdrw{transform-box:fill-box;transform-origin:center bottom;transition:transform .85s cubic-bezier(.55,0,.2,1)}
 .dw .frg.open .fdrw{transform:perspective(7000px) rotateX(-86deg)}
+
+/* 처음 그려질 때는 문이 다 그려진 뒤에 내부가 생김 (안이 먼저 비치지 않게) */
+@keyframes showIns{to{visibility:visible}}
+.dw .insides,.dw .sw>.inside,.dw .drw .dbox{visibility:hidden;animation:showIns 0s linear 2.8s forwards}
+
+/* range hood */
+.dw .hood .hood-light{opacity:0;transition:opacity .9s ease;pointer-events:none}
+.dw .hood.open .hood-light{opacity:1}
+.dw .hood-lamp{fill:#6f6d69;transition:fill .5s}
+.dw .hood.open .hood-lamp{fill:#fff6d8}
+.dw .hood-led{fill:#55504b;transition:fill .4s}
+.dw .hood.open .hood-led{fill:#7fd6a0}
+.dw .hood-fan{transition:opacity .4s}
+.dw .hood.open .hood-fan > *{transform-box:fill-box;transform-origin:center}
+.dw .hood.open .hood-fan path{animation:spin .45s linear infinite}
+.dw .hood-air,.dw .hood-puff{opacity:0;transition:opacity .8s;pointer-events:none}
+.dw .hood.open .hood-air,.dw .hood.open .hood-puff{opacity:1}
+.dw .hood-air path{fill:none;stroke:#9fbfd2;stroke-width:9;stroke-linecap:round;stroke-dasharray:60 90;opacity:.85;animation:suck 1.6s linear infinite}
+@keyframes suck{from{stroke-dashoffset:150}to{stroke-dashoffset:-150}}
+.dw .hood-puff circle{fill:#eef4f7;opacity:0;transform-box:fill-box;transform-origin:center}
+.dw .hood.open .hood-puff circle{animation:puff 2.1s ease-in infinite}
+@keyframes puff{0%{opacity:0;transform:translate(0,0) scale(1)}20%{opacity:.7}100%{opacity:0;transform:translate(0,-720px) scale(.35)}}
