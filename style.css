@@ -369,9 +369,9 @@ details.lines tr.neg td:last-child{color:#b4553f}
 /* robot */
 .dw .robot,.dw .robot-plan{transform-box:fill-box}
 .dw .robot.go{animation:robotOut 4s cubic-bezier(.45,0,.3,1)}
-.dw .robot-plan.go{animation:roam 5s cubic-bezier(.45,0,.3,1)}
+.dw .robot-plan.go{animation:roam 22s ease-in-out}
 @keyframes robotOut{0%,100%{transform:none}30%,60%{transform:translateX(-620px)}}
-@keyframes roam{0%,100%{transform:none}20%{transform:translate(0,520px)}45%{transform:translate(-700px,700px)}70%{transform:translate(-400px,320px)}}
+@keyframes roam{0%{transform:translate(0px,0px)}8.6%{transform:translate(-685px,490px)}28.2%{transform:translate(-2595px,490px)}36.9%{transform:translate(-2595px,1340px)}40.4%{transform:translate(-2255px,1340px)}48%{transform:translate(-2255px,590px)}51.5%{transform:translate(-1915px,590px)}59.2%{transform:translate(-1915px,1340px)}67.3%{transform:translate(-2595px,940px)}71.9%{transform:translate(-2595px,490px)}91.4%{transform:translate(-685px,490px)}100%{transform:translate(0px,0px)}}
 /* rice cooker tray */
 .dw .tray .pull{transform-box:fill-box;transform-origin:center bottom;transition:transform .8s cubic-bezier(.33,1,.68,1);will-change:transform}
 .dw .tray.open .pull{transform:translateY(70px) scale(1.16)}
