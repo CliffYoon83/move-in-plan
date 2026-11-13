@@ -866,14 +866,50 @@ const bottle = (x, y, h, c) => `<rect x="${x + 12}" y="${y - h - 30}" width="20"
 const jar = (x, y, h, c) => `<rect x="${x}" y="${y - h}" width="64" height="${h}" rx="8" fill="${c}"/><rect x="${x + 4}" y="${y - h - 14}" width="56" height="16" rx="5" fill="#6b5e52"/>`;
 const snack = (x, y, w, h, c) => `<rect x="${x}" y="${y - h}" width="${w}" height="${h}" rx="5" fill="${c}"/><rect x="${x + 8}" y="${y - h + 14}" width="${w - 16}" height="${h * .3}" rx="3" fill="#fff" opacity=".55"/>`;
 
+function pika(cx, by, H = 280, wink = false) {
+  const k = H / 280;                       // 기준 280 높이로 그린 뒤 비율 조정
+  const Y = '#f6d22a', YS = '#d9ac10', INK = '#2b2622';
+  const eyeL = wink
+    ? `<path d="M-40 -150 q14 -12 28 0" fill="none" stroke="${INK}" stroke-width="6" stroke-linecap="round"/>`
+    : `<ellipse cx="-27" cy="-152" rx="11" ry="13" fill="${INK}"/><circle cx="-23" cy="-157" r="4.5" fill="#fff"/>`;
+  const arms = wink
+    ? `<ellipse cx="-58" cy="-112" rx="17" ry="22" fill="${Y}" stroke="${YS}" stroke-width="3" transform="rotate(-25 -58 -112)"/>
+       <ellipse cx="58" cy="-112" rx="17" ry="22" fill="${Y}" stroke="${YS}" stroke-width="3" transform="rotate(25 58 -112)"/>`
+    : `<ellipse cx="-36" cy="-70" rx="15" ry="22" fill="${Y}" stroke="${YS}" stroke-width="3" transform="rotate(20 -36 -70)"/>
+       <ellipse cx="36" cy="-70" rx="15" ry="22" fill="${Y}" stroke="${YS}" stroke-width="3" transform="rotate(-20 36 -70)"/>`;
+  return `<g class="pika" data-tip="피카츄 인형" transform="translate(${cx} ${by}) scale(${k})">
+    <ellipse cx="0" cy="0" rx="78" ry="10" fill="#000" opacity=".12"/>
+    <!-- 꼬리 -->
+    <path d="M58 -40 l40 -30 l-14 -6 l34 -40 l-46 26 l12 8 l-40 26z" fill="${Y}" stroke="${YS}" stroke-width="3" stroke-linejoin="round"/>
+    <!-- 귀 -->
+    <path d="M-44 -192 L-96 -282 L-20 -214 Z" fill="${Y}" stroke="${YS}" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M-78 -251 L-96 -282 L-66 -258 Z" fill="${INK}"/>
+    <path d="M44 -192 L${wink ? 108 : 96} -282 L20 -214 Z" fill="${Y}" stroke="${YS}" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M${wink ? 88 : 78} -251 L${wink ? 108 : 96} -282 L66 -258 Z" fill="${INK}"/>
+    <!-- 몸 -->
+    <ellipse cx="0" cy="-58" rx="62" ry="58" fill="${Y}" stroke="${YS}" stroke-width="3"/>
+    <ellipse cx="-34" cy="-6" rx="26" ry="12" fill="${Y}" stroke="${YS}" stroke-width="3"/>
+    <ellipse cx="34" cy="-6" rx="26" ry="12" fill="${Y}" stroke="${YS}" stroke-width="3"/>
+    <!-- 머리 -->
+    <ellipse cx="0" cy="-148" rx="70" ry="60" fill="${Y}" stroke="${YS}" stroke-width="3"/>
+    <ellipse cx="-20" cy="-176" rx="26" ry="12" fill="#fff" opacity=".35"/>
+    ${eyeL}
+    <ellipse cx="27" cy="-152" rx="11" ry="13" fill="${INK}"/><circle cx="31" cy="-157" r="4.5" fill="#fff"/>
+    <ellipse cx="0" cy="-140" rx="3" ry="2" fill="${INK}"/>
+    <path d="M-12 -130 q6 7 12 0 q6 7 12 0" fill="none" stroke="${INK}" stroke-width="3.5" stroke-linecap="round"/>
+    <circle cx="-48" cy="-126" r="14" fill="#e8473c"/><circle cx="48" cy="-126" r="14" fill="#e8473c"/>
+    ${arms}
+  </g>`;
+}
+
 function inside(x, y, w, h, kind = 'shelf') {
   let s = `<rect class="cab-in" x="${x}" y="${y}" width="${w}" height="${h}"/>`;
   const shelfAt = yy => `<rect class="shelf" x="${x + 6}" y="${yy}" width="${w - 12}" height="16"/><rect x="${x + 6}" y="${yy + 16}" width="${w - 12}" height="18" fill="url(#shelfShade)"/>`;
   const fit = (step, fn, pad = 30) => { let out = '', k = 0; for (let cx = x + pad; cx + step - 20 < x + w - pad; cx += step, k++) out += fn(cx, k); return out; };
-  if (kind === 'upper') {
+  if (kind === 'upper' || kind === 'upper-pika') {
     const mid = y + h * 0.5, bot = y + h - 6;
     s += fit(150, (cx, k) => k % 2 ? bowls(cx, mid, 3) : cup(cx, mid) + cup(cx + 62, mid, '#e9e2d6'));
-    s += fit(170, (cx, k) => k % 2 ? pot(cx + 30, bot, 120, 80) : plates(cx, bot, 6));
+    s += kind === 'upper-pika' ? pika(x + w / 2, bot, Math.min(300, h * 0.44)) : fit(170, (cx, k) => k % 2 ? pot(cx + 30, bot, 120, 80) : plates(cx, bot, 6));
     s += shelfAt(mid);
   } else if (kind === 'sinkbase') {
     s += `<path d="M${x + w - 140} ${y} v150 a60 60 0 0 1 -120 0 v-50" fill="none" stroke="#b9b7b3" stroke-width="22" stroke-linecap="round"/>`;
@@ -963,7 +999,7 @@ function sinkSVG() {
     </g>
   </g>`;
   [[950, 'left'], [1340, 'right'], [1730, 'left'], [2120, 'right']].forEach(([x, hg], i) =>
-    s += swing(x, UT, 390, UB - UT, hg, `상부장 780 (${i < 2 ? '좌' : '우'})`, inside(x, UT, 390, UB - UT, 'upper')));
+    s += swing(x, UT, 390, UB - UT, hg, `상부장 780 (${i < 2 ? '좌' : '우'})`, inside(x, UT, 390, UB - UT, x === 1730 ? 'upper-pika' : 'upper')));
 
   // 키큰장 (하부 150 띄움 → 로봇청소기)
   s += swing(2510, UT, 450, 1070, 'right', '키큰장 450', inside(2510, UT, 450, 1070, 'tall'));
@@ -1222,7 +1258,7 @@ function pantry(x0, y0, x1, y1) {
   const jar = (x, y, h, c) => `<rect x="${x}" y="${y - h}" width="70" height="${h}" rx="10" fill="${c}" opacity=".9"/><rect x="${x + 6}" y="${y - h - 16}" width="58" height="18" rx="5" fill="#6b5e52"/>`;
   const boxy = (x, y, w, h, c) => `<rect x="${x}" y="${y - h}" width="${w}" height="${h}" rx="6" fill="${c}"/>`;
   s += jar(x0 + 60, y0 + 300, 150, '#f3eadb') + jar(x0 + 150, y0 + 300, 120, '#e8d7b9') + jar(x0 + 240, y0 + 300, 170, '#f1e4cc') + boxy(x0 + 420, y0 + 300, 200, 160, '#c8b79d') + boxy(x0 + 650, y0 + 300, 220, 120, '#a99a85');
-  s += boxy(x0 + 50, band, 260, 190, '#d5c4a8') + jar(x0 + 360, band, 160, '#f3eadb') + jar(x0 + 450, band, 140, '#e8d7b9') + boxy(x0 + 620, band, 250, 220, '#b8a78d');
+  s += boxy(x0 + 50, band, 260, 190, '#d5c4a8') + jar(x0 + 360, band, 160, '#f3eadb') + jar(x0 + 450, band, 140, '#e8d7b9') + pika(x0 + 745, band, 270, true);
   s += boxy(split + 50, band + 330, 300, 160, '#cbb99c') + jar(split + 70, band + 660, 160, '#f1e4cc') + jar(split + 170, band + 660, 130, '#efe2c9') + jar(split + 270, band + 660, 150, '#e8d7b9');
   s += boxy(split + 60, band + 990, 280, 200, '#a99a85') + boxy(split + 40, band + 1320, 320, 150, '#d5c4a8');
   // 왼쪽 아래 키 큰 공간: 청소기
