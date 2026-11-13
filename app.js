@@ -45,12 +45,12 @@ function defaults() {
   return {
     version: 4,
     flags: { etcSeeded: true },
-    colors: { door: '#cbbfae', top: '#ece5da' },
+    colors: { door: '#bdbdb8', top: '#ece5da' },
     items: [
       // ---------- 인테리어 ----------
       {
         id: uid(), cat: 'interior', name: '싱크대', status: 'confirmed',
-        model: 'ㄱ자 2960 × 1570 · 도어 영림 듄 선셋 스톤 · 상판 칸스톤 크레모사',
+        model: 'ㄱ자 2960 × 1570 · 도어 한솔 포그 그레이 · 상판 칸스톤 크레모사',
         store: '(주)한솔홈', link: '',
         note: '최신 도면 기준. 비규격장, T5 간접조명.\n보조주방 상부장 없음 · 키큰장 하부 로봇청소기 150 띄움.',
         lines: [
@@ -145,12 +145,23 @@ function ensureEtc(st) {
   return added;
 }
 const OLD_STONE = String.fromCharCode(0xD55C, 0xC2A4, 0xD1A4); // 이전 표기
+const TEXT_FIX = [[OLD_STONE, '칸스톤'], ['영림 듄 선셋'.concat(' 스톤'), '한솔 포그 그레이']];
 function fixStone(st) {
   let changed = false;
   for (const it of st.items) for (const f of ['model', 'note']) {
-    if (typeof it[f] === 'string' && it[f].includes(OLD_STONE)) { it[f] = it[f].split(OLD_STONE).join('칸스톤'); changed = true; }
+    for (const [a, b] of TEXT_FIX) {
+      if (typeof it[f] === 'string' && it[f].includes(a)) { it[f] = it[f].split(a).join(b); changed = true; }
+    }
   }
   return changed;
+}
+const OLD_DOOR = '#cbbfae', NEW_DOOR = '#bdbdb8';
+function fixDoorColor(st) {
+  // 도어재 변경(포그 그레이) 시 한 번만 색상 교체 — 이후 사용자가 칩으로 고른 색은 유지
+  if (st.flags?.doorFinish === 'fog-gray') return false;
+  st.colors = { ...(st.colors || {}), door: NEW_DOOR };
+  st.flags = { ...(st.flags || {}), doorFinish: 'fog-gray' };
+  return true;
 }
 function migrate4(st) {
   if ((st.version || 1) >= 4) return;
@@ -179,9 +190,9 @@ function migrate3(st) {
 
 let state = store.get(LS_KEY);
 if (!state || !Array.isArray(state.items)) state = defaults();
-state.colors ||= { door: '#cbbfae', top: '#ece5da' };
+state.colors ||= { door: '#bdbdb8', top: '#ece5da' };
 migrate(state);
-if (fixStone(state)) store.set(LS_KEY, state);
+if (fixStone(state) | fixDoorColor(state)) store.set(LS_KEY, state);
 let live = store.get(LS_LIVE) || {};
 const save = () => { store.set(LS_KEY, state); pushCloud(); };
 
@@ -253,6 +264,7 @@ window.addEventListener('cloud:auth', e => {
   setSyncState(sync.user ? 'ok' : 'view');
   if (sync.user && sync.loaded && !sync.remote.size && !sync.seeded) seedCloud();
   else if (sync.user && maybeSeedEtc()) renderAll();
+  if (sync.user && sync.loaded) setTimeout(() => pushCloud(), 0); // 로그인 직후 교정된 문구·색상 반영
 });
 window.addEventListener('cloud:items', e => {
   const { items, fromCache } = e.detail;
@@ -280,6 +292,7 @@ window.addEventListener('cloud:meta', e => {
   if (d.colors) state.colors = d.colors;
   state.flags = d.flags || {};
   sync.metaJSON = JSON.stringify(metaOf(state));
+  if (fixDoorColor(state) && sync.user) setTimeout(() => pushCloud(), 0); // 공유 저장소의 이전 도어색 교정
   store.set(LS_KEY, state); applyColors();
   if (maybeSeedEtc()) renderAll();
 });
@@ -806,7 +819,7 @@ $('#topColor').addEventListener('click', e => { if (!canEdit()) e.preventDefault
 const DEFS = `<defs>
   <filter id="grain" x="0" y="0" width="100%" height="100%">
     <feTurbulence type="fractalNoise" baseFrequency="0.006 0.045" numOctaves="3" seed="7"/>
-    <feColorMatrix values="0 0 0 0 .35  0 0 0 0 .29  0 0 0 0 .22  0 0 0 .38 -.09"/>
+    <feColorMatrix values="0 0 0 0 .3  0 0 0 0 .3  0 0 0 0 .3  0 0 0 .2 -.06"/>
     <feComposite in2="SourceGraphic" operator="in"/>
   </filter>
   <filter id="marble" x="0" y="0" width="100%" height="100%">
@@ -1347,7 +1360,7 @@ function builtinSVG() {
 
 const SPECS = {
   sink: [
-    ['규격', 'ㄱ자 2960 × 1570'], ['도어', '영림 듄 선셋 스톤'], ['상판', '칸스톤 크레모사'],
+    ['규격', 'ㄱ자 2960 × 1570'], ['도어', '한솔 포그 그레이'], ['상판', '칸스톤 크레모사'],
     ['벽체', '크레모사 2560'], ['조명', 'T5 간접 + 라인조명'], ['싱크볼', '백조 깜포르테 860'],
     ['수전', '하츠 TS-100 폭포수전'], ['보조주방', '1060 × 650'], ['타일', '300×600 덧방'], ['로봇청소기', '키큰장 하부 150'],
   ],
@@ -1357,9 +1370,9 @@ const SPECS = {
   ],
   builtin: [
     ['규격', '3220 × 855'], ['구성', '980 · 915/805 · 450'], ['내부', 'ㄱ자 팬트리장'], ['조명', 'H5 조명'],
-    ['슬라이드장', '밥솥 수납'], ['냉장고', 'RM70F64Q1A (912)'], ['김치냉장고', 'RK70F42M2A (799)'], ['도어', '영림 듄 선셋 스톤'],
+    ['슬라이드장', '밥솥 수납'], ['냉장고', 'RM70F64Q1A (912)'], ['김치냉장고', 'RK70F42M2A (799)'], ['도어', '한솔 포그 그레이'],
   ],
-  render: [['안내', '이전 시안 렌더링'], ['기준', '최신 도면 우선'], ['상판', '크레모사로 변경'], ['도어', '듄 선셋 스톤으로 변경']],
+  render: [['안내', '이전 시안 렌더링'], ['기준', '최신 도면 우선'], ['상판', '크레모사로 변경'], ['도어', '포그 그레이로 변경']],
 };
 const HINTS = {
   sink: '도어 · 서랍 · 레인지후드 · 대리석 벽체(조명) · 싱크볼(물) · 로봇청소기를 눌러보세요',
@@ -1447,7 +1460,7 @@ $('#importFile').addEventListener('change', async e => {
   try {
     const j = JSON.parse(await f.text());
     if (!Array.isArray(j.items)) throw 0;
-    state = j; state.colors ||= { door: '#cbbfae', top: '#ece5da' };
+    state = j; state.colors ||= { door: '#bdbdb8', top: '#ece5da' };
     save(); applyColors(); renderAll(); toast('데이터를 불러왔어요');
   } catch { toast('올바른 JSON 파일이 아니에요'); }
   e.target.value = '';
