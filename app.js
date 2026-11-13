@@ -50,7 +50,7 @@ function defaults() {
       // ---------- 인테리어 ----------
       {
         id: uid(), cat: 'interior', name: '싱크대', status: 'confirmed',
-        model: 'ㄱ자 2960 × 1570 · 도어 영림 듄 선셋 스톤 · 상판 한스톤 크레모사',
+        model: 'ㄱ자 2960 × 1570 · 도어 영림 듄 선셋 스톤 · 상판 칸스톤 크레모사',
         store: '(주)한솔홈', link: '',
         note: '최신 도면 기준. 비규격장, T5 간접조명.\n보조주방 상부장 없음 · 키큰장 하부 로봇청소기 150 띄움.',
         lines: [
@@ -144,10 +144,19 @@ function ensureEtc(st) {
   st.flags = { ...(st.flags || {}), etcSeeded: true };
   return added;
 }
+const OLD_STONE = String.fromCharCode(0xD55C, 0xC2A4, 0xD1A4); // 이전 표기
+function fixStone(st) {
+  let changed = false;
+  for (const it of st.items) for (const f of ['model', 'note']) {
+    if (typeof it[f] === 'string' && it[f].includes(OLD_STONE)) { it[f] = it[f].split(OLD_STONE).join('칸스톤'); changed = true; }
+  }
+  return changed;
+}
 function migrate4(st) {
   if ((st.version || 1) >= 4) return;
   ensureEtc(st);
   st.version = 4;
+  fixStone(st);
   store.set(LS_KEY, st);
 }
 function migrate3(st) {
@@ -172,6 +181,7 @@ let state = store.get(LS_KEY);
 if (!state || !Array.isArray(state.items)) state = defaults();
 state.colors ||= { door: '#cbbfae', top: '#ece5da' };
 migrate(state);
+if (fixStone(state)) store.set(LS_KEY, state);
 let live = store.get(LS_LIVE) || {};
 const save = () => { store.set(LS_KEY, state); pushCloud(); };
 
@@ -256,6 +266,7 @@ window.addEventListener('cloud:items', e => {
   items.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
   sync.remote = new Map(items.map(it => [it.id, stable(it)]));
   state.items = items.map(({ order, ...it }) => it);
+  if (fixStone(state) && sync.user) setTimeout(() => pushCloud(), 0);
   maybeSeedEtc();
   store.set(LS_KEY, state);
   if (editing) editing = state.items.find(i => i.id === editing.id) || editing;
@@ -965,7 +976,7 @@ function sinkSVG() {
   </g>`;
 
   // 상판
-  s += box(0, CT, 2510, SLAB, 'top', '상판 · 한스톤 크레모사');
+  s += box(0, CT, 2510, SLAB, 'top', '상판 · 칸스톤 크레모사');
 
   // 하부장
   s += box(0, BT, 50, TK - BT, 'door', '필러 FA 50');
@@ -1283,7 +1294,7 @@ function builtinSVG() {
 
 const SPECS = {
   sink: [
-    ['규격', 'ㄱ자 2960 × 1570'], ['도어', '영림 듄 선셋 스톤'], ['상판', '한스톤 크레모사'],
+    ['규격', 'ㄱ자 2960 × 1570'], ['도어', '영림 듄 선셋 스톤'], ['상판', '칸스톤 크레모사'],
     ['벽체', '크레모사 2560'], ['조명', 'T5 간접 + 라인조명'], ['싱크볼', '백조 깜포르테 860'],
     ['수전', '하츠 TS-100 폭포수전'], ['보조주방', '1060 × 650'], ['타일', '300×600 덧방'], ['로봇청소기', '키큰장 하부 150'],
   ],
