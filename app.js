@@ -9,6 +9,7 @@
 
 const LS_KEY = 'moveplan.v1';
 const LS_LIVE = 'moveplan.live.v1';
+const LS_CHART = 'moveplan.chart.v1';
 const LS_THEME = 'moveplan.theme';
 
 const CATS = {
@@ -199,6 +200,7 @@ state.colors ||= { door: '#dedcd7', top: '#ece5da' };
 migrate(state);
 if (fixStone(state) | fixDoorColor(state)) store.set(LS_KEY, state);
 let live = store.get(LS_LIVE) || {};
+let charts = store.get(LS_CHART) || {};   // 에누리 일별 최저가 { id: { at, pts: [[라벨, 가격], …] } }
 const save = () => { store.set(LS_KEY, state); pushCloud(); };
 
 /* ---------------- cloud (Firebase) sync ---------------- */
@@ -478,7 +480,7 @@ function cardHTML(it, i) {
     ${priceHTML}
     ${liveHTML}
     ${it.features?.length ? `<ul class="features">${it.features.map(f => `<li>${esc(f)}</li>`).join('')}</ul>` : ''}
-    ${meta ? `<div class="meta">${meta}</div>` : ''}
+    ${meta || it.enuri ? `<div class="meta">${meta}${it.enuri ? trendHTML(it.enuri) : ''}</div>` : ''}
     ${it.note ? `<p class="note">${esc(it.note)}</p>` : ''}
     ${lines}
     <div class="card-actions">
@@ -754,6 +756,56 @@ document.addEventListener('pointermove', e => {
 });
 
 /* ---------------- Enuri live price ---------------- */
+// 일주일 최저가 추이 (에누리 일별 최저가 + 현재가)
+function trendHTML(id) {
+  const c = charts[id];
+  if (!c?.pts?.length) return `<div class="trend empty">최저가 추이 불러오는 중…</div>`;
+  let pts = c.pts.slice(-8);
+  if (live[id]?.price && live[id].at > (c.at || 0)) pts = [...pts.slice(0, -1), ['현재', live[id].price]];
+  const W = 220, H = 46, PX = 6, PT = 8, PB = 14;
+  const ys = pts.map(p => p[1]), lo = Math.min(...ys), hi = Math.max(...ys), span = hi - lo || 1;
+  const X = k => PX + k * (W - 2 * PX) / Math.max(1, pts.length - 1);
+  const Y = v => PT + (hi - v) / span * (H - PT - PB);
+  const line = pts.map((p, k) => `${k ? 'L' : 'M'}${X(k).toFixed(1)} ${Y(p[1]).toFixed(1)}`).join('');
+  const area = `${line}L${X(pts.length - 1).toFixed(1)} ${H - PB}L${X(0).toFixed(1)} ${H - PB}Z`;
+  const kMin = ys.lastIndexOf(lo), kL = pts.length - 1;
+  const first = ys[0], last = ys[kL], diff = last - first;
+  const dTxt = diff === 0 ? '변동 없음' : `${diff < 0 ? '▼' : '▲'} ${won(Math.abs(diff))}`;
+  const dots = pts.map((p, k) => `<circle cx="${X(k).toFixed(1)}" cy="${Y(p[1]).toFixed(1)}" r="7" fill="transparent"><title>${esc(p[0])} · ${won(p[1])}</title></circle>`).join('');
+  return `<div class="trend" title="에누리 최저가 · 최근 7일">
+    <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-label="최근 7일 최저가 추이">
+      <defs><linearGradient id="tg${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--accent2)" stop-opacity=".28"/><stop offset="1" stop-color="var(--accent2)" stop-opacity="0"/></linearGradient></defs>
+      <path class="trend-area" d="${area}" fill="url(#tg${id})"/>
+      <path class="trend-line" d="${line}" pathLength="1"/>
+      <circle cx="${X(kMin).toFixed(1)}" cy="${Y(lo).toFixed(1)}" r="2.6" class="trend-min"/>
+      <circle cx="${X(kL).toFixed(1)}" cy="${Y(last).toFixed(1)}" r="3.4" class="trend-now"/>
+      <text x="${PX}" y="${H - 2}" class="trend-x">${esc(pts[0][0])}</text>
+      <text x="${W - PX}" y="${H - 2}" class="trend-x" text-anchor="end">${esc(pts[kL][0])}</text>
+      ${dots}
+    </svg>
+    <div class="trend-cap"><span>7일 최저 <b>${won(lo)}</b></span><span class="${diff < 0 ? 'down' : diff > 0 ? 'up' : ''}">${dTxt}</span></div>
+  </div>`;
+}
+function setChart(id, data, at) {
+  const pts = (data || []).filter(d => d && d.y).map(d => [String(d.x).replace(/[()]/g, ''), Number(d.y)]);
+  if (pts.length) { charts[id] = { at, pts }; store.set(LS_CHART, charts); return true; }
+  return false;
+}
+async function fetchChart(id) {
+  const url = `https://price.enuri.com/api/product/catalog/lowest-price-chart?catalogNo=${id}&delivery=N&showType=1M`;
+  for (const p of PROXIES) {
+    try {
+      const ctl = new AbortController();
+      const to = setTimeout(() => ctl.abort(), 10000);
+      const r = await fetch(p(url), { signal: ctl.signal });
+      clearTimeout(to);
+      if (!r.ok) continue;
+      const j = await r.json();
+      if (setChart(id, j?.data?.chartProps?.data, Date.now())) return true;
+    } catch {}
+  }
+  return false;
+}
 const PROXIES = [
   u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
   u => `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(u)}`,
@@ -790,6 +842,7 @@ async function loadPrices() {
       for (const [id, v] of Object.entries(j.items || {})) {
         const at = Date.parse(v.updatedAt || j.updatedAt);
         if (v.price && (!live[id] || live[id].at < at)) live[id] = { price: v.price, at, src: 'action' };
+        if (v.chart && (!charts[id] || (charts[id].at || 0) < at)) setChart(id, v.chart.map(([x, y]) => ({ x, y })), at);
       }
       store.set(LS_LIVE, live);
       renderAll();
@@ -798,8 +851,11 @@ async function loadPrices() {
   // 오래된 값은 브라우저에서 한 번 더 조회 시도
   const ids = [...new Set(state.items.filter(i => i.enuri).map(i => i.enuri))];
   for (const id of ids) {
-    if (!live[id] || Date.now() - live[id].at > 3 * 3600e3) {
+    if (!live[id] || Date.now() - live[id].at > 3600e3) {
       if (await fetchLive(id)) renderAll();
+    }
+    if (!charts[id] || Date.now() - (charts[id].at || 0) > 3600e3) {
+      if (await fetchChart(id)) renderAll();
     }
   }
 }
@@ -1554,4 +1610,5 @@ applyColors();
 renderAll();
 requestAnimationFrame(moveInk);
 loadPrices();
+setInterval(loadPrices, 3600e3);   // 페이지를 열어둔 동안 1시간마다 최저가·추이 자동 갱신
 })();

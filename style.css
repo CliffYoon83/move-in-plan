@@ -209,6 +209,20 @@ h2{font-size:clamp(26px,3.2vw,36px);margin:0;letter-spacing:-.03em;font-weight:8
 @keyframes spin{to{transform:rotate(360deg)}}
 .meta{display:flex;gap:8px;flex-wrap:wrap;font-size:12px}
 .tag{padding:3px 9px;border-radius:7px;background:var(--soft);color:var(--ink2);font-weight:600;text-decoration:none}
+.meta{align-items:center}
+.trend{flex:1 1 180px;min-width:150px;display:flex;flex-direction:column;gap:2px}
+.trend svg{width:100%;height:46px;display:block;overflow:visible}
+.trend-line{fill:none;stroke:var(--accent2);stroke-width:2;stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke;stroke-dasharray:1;stroke-dashoffset:1;animation:trendDraw 1.2s .2s cubic-bezier(.3,.7,.3,1) forwards}
+.trend-area{opacity:0;animation:fadeIn .8s .7s forwards}
+.trend-now{fill:var(--accent2);stroke:var(--card,#fff);stroke-width:1.5;vector-effect:non-scaling-stroke}
+.trend-min{fill:#e0322b}
+.trend-x{font-size:8px;fill:var(--ink3,#999)}
+.trend-cap{display:flex;justify-content:space-between;gap:6px;font-size:11px;color:var(--ink2)}
+.trend-cap b{color:var(--ink)}
+.trend-cap .down{color:#2e8b57;font-weight:700}
+.trend-cap .up{color:#e0322b;font-weight:700}
+.trend.empty{font-size:11px;color:var(--ink2);justify-content:center}
+@keyframes trendDraw{to{stroke-dashoffset:0}}
 a.tag:hover{color:var(--ink)}
 .note{font-size:13px;color:var(--ink2);white-space:pre-wrap;margin:0;line-height:1.5}
 details.lines{font-size:13px;border-top:1px dashed var(--line);padding-top:8px}
