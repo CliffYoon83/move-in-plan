@@ -450,7 +450,7 @@ details.lines tr.neg td:last-child{color:#b4553f}
 .dw .frg.open .fname{opacity:0}
 
 .dw .fdrw{transform-box:fill-box;transform-origin:center bottom;transition:transform .85s cubic-bezier(.55,0,.2,1)}
-.dw .frg.open .fdrw{transform:perspective(7000px) rotateX(-86deg)}
+.dw .frg.open .fdrw{transform:scaleY(.05)}   /* 서랍을 앞으로 빼낸 모습: 앞판이 바닥 쪽 얇은 띠로 */
 
 /* 처음 그려질 때는 문이 다 그려진 뒤에 내부가 생김 (안이 먼저 비치지 않게) */
 @keyframes showIns{to{visibility:visible}}
