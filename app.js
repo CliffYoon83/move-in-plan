@@ -768,6 +768,8 @@ const DEFS = `<defs>
   <linearGradient id="bowlFloor" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d9d8d5"/><stop offset=".55" stop-color="#c9c7c3"/><stop offset="1" stop-color="#dedcd9"/></linearGradient>
   <radialGradient id="drainCover" cx=".42" cy=".38" r=".7"><stop offset="0" stop-color="#f6f6f4"/><stop offset=".6" stop-color="#d4d3d0"/><stop offset="1" stop-color="#a8a6a2"/></radialGradient>
   <linearGradient id="panel" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#f6f5f2"/><stop offset=".55" stop-color="#eeede9"/><stop offset="1" stop-color="#e6e4e0"/></linearGradient>
+  <linearGradient id="topShade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5a4f45" stop-opacity=".22"/><stop offset="1" stop-color="#5a4f45" stop-opacity="0"/></linearGradient>
+  <linearGradient id="shelfShade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5a4f45" stop-opacity=".14"/><stop offset="1" stop-color="#5a4f45" stop-opacity="0"/></linearGradient>
   <radialGradient id="heat"><stop offset="0" stop-color="#ffb347"/><stop offset=".55" stop-color="#ff5a2a"/><stop offset="1" stop-color="#c81e0a" stop-opacity="0"/></radialGradient>
   <linearGradient id="waterG" x1="0" y1="0" x2="0" y2="1">
     <stop offset="0" stop-color="#d7eefa" stop-opacity=".95"/><stop offset="1" stop-color="#a9d6ee" stop-opacity=".55"/>
@@ -803,39 +805,71 @@ const ol = (dpath, delay) => `<path class="ol" pathLength="1" d="${dpath}" style
 const grip = (x, y, w) => `<rect class="dark" x="${x}" y="${y}" width="${w}" height="14"/>`;
 
 /* 캐비닛 내부 (문 뒤에 그려짐) */
+/* 캐비닛 내부 (문 뒤에 그려짐) — 사진처럼 밝은 화이트 내부 + 선반 + 그릇/냄비 */
+const plates = (x, y, n = 5, w = 130) => Array.from({ length: n }, (_, k) => `<rect x="${x}" y="${y - 10 - k * 13}" width="${w}" height="10" rx="5" fill="#fbfaf8" stroke="#d9d4cc" stroke-width="2"/>`).join('');
+const bowls = (x, y, n = 3, w = 110) => Array.from({ length: n }, (_, k) => `<path d="M${x} ${y - 16 - k * 22}h${w}q-8 ${36} -${w / 2} ${36}t-${w / 2} -${36}z" fill="#fbfaf8" stroke="#d9d4cc" stroke-width="2"/>`).join('');
+const cup = (x, y, c = '#f7f5f1') => `<rect x="${x}" y="${y - 62}" width="48" height="62" rx="8" fill="${c}" stroke="#d3cdc4" stroke-width="2"/><path d="M${x + 48} ${y - 48}q22 0 22 18t-22 18" fill="none" stroke="#d3cdc4" stroke-width="6"/>`;
+const pot = (x, y, w = 170, h = 96) => `<rect x="${x}" y="${y - h}" width="${w}" height="${h}" rx="10" fill="url(#steel)" stroke="#8d8a86" stroke-width="2"/>
+  <rect x="${x - 6}" y="${y - h - 12}" width="${w + 12}" height="16" rx="8" fill="#c9c7c3" stroke="#8d8a86" stroke-width="2"/><rect x="${x + w / 2 - 18}" y="${y - h - 30}" width="36" height="20" rx="8" fill="#3a3532"/>
+  <rect x="${x - 28}" y="${y - h + 18}" width="28" height="12" rx="6" fill="#3a3532"/><rect x="${x + w}" y="${y - h + 18}" width="28" height="12" rx="6" fill="#3a3532"/>`;
+const pan = (x, y, w = 220) => `<path d="M${x} ${y - 40}h${w}l-14 34q-4 6 -12 6h-${w - 52}q-8 0 -12 -6z" fill="#3c3835"/><rect x="${x + w - 4}" y="${y - 40}" width="110" height="14" rx="7" fill="#2b2826"/>`;
+const bottle = (x, y, h, c) => `<rect x="${x + 12}" y="${y - h - 30}" width="20" height="34" rx="4" fill="${c}" opacity=".95"/><rect x="${x}" y="${y - h}" width="44" height="${h}" rx="10" fill="${c}"/><rect x="${x + 6}" y="${y - h * .62}" width="32" height="${h * .3}" rx="3" fill="#fff" opacity=".75"/>`;
+const jar = (x, y, h, c) => `<rect x="${x}" y="${y - h}" width="64" height="${h}" rx="8" fill="${c}"/><rect x="${x + 4}" y="${y - h - 14}" width="56" height="16" rx="5" fill="#6b5e52"/>`;
+const snack = (x, y, w, h, c) => `<rect x="${x}" y="${y - h}" width="${w}" height="${h}" rx="5" fill="${c}"/><rect x="${x + 8}" y="${y - h + 14}" width="${w - 16}" height="${h * .3}" rx="3" fill="#fff" opacity=".55"/>`;
+
 function inside(x, y, w, h, kind = 'shelf') {
   let s = `<rect class="cab-in" x="${x}" y="${y}" width="${w}" height="${h}"/>`;
-  const sh = n => { for (let k = 1; k <= n; k++) { const yy = y + (h / (n + 1)) * k; s += `<rect class="shelf" x="${x + 8}" y="${yy}" width="${w - 16}" height="14"/>`; } };
+  const shelfAt = yy => `<rect class="shelf" x="${x + 6}" y="${yy}" width="${w - 12}" height="16"/><rect x="${x + 6}" y="${yy + 16}" width="${w - 12}" height="18" fill="url(#shelfShade)"/>`;
+  const fit = (step, fn, pad = 30) => { let out = '', k = 0; for (let cx = x + pad; cx + step - 20 < x + w - pad; cx += step, k++) out += fn(cx, k); return out; };
   if (kind === 'upper') {
-    sh(1);
-    const y1 = y + h / 2, y2 = y + h - 8;
-    for (let cx = x + 50; cx < x + w - 60; cx += 85) {
-      s += `<rect class="ware" x="${cx}" y="${y1 - 120}" width="60" height="120" rx="8"/>`;
-      s += `<rect class="ware2" x="${cx + 5}" y="${y2 - 70}" width="70" height="70" rx="30"/>`;
-    }
+    const mid = y + h * 0.5, bot = y + h - 6;
+    s += fit(150, (cx, k) => k % 2 ? bowls(cx, mid, 3) : cup(cx, mid) + cup(cx + 62, mid, '#e9e2d6'));
+    s += fit(170, (cx, k) => k % 2 ? pot(cx + 30, bot, 120, 80) : plates(cx, bot, 6));
+    s += shelfAt(mid);
   } else if (kind === 'sinkbase') {
-    s += `<path d="M${x + w - 120} ${y} v120 a60 60 0 0 1 -120 0 v-40" fill="none" stroke="#a8a6a2" stroke-width="22"/>`;
-    s += `<rect class="ware" x="${x + 60}" y="${y + h - 220}" width="90" height="200" rx="16"/>`;
+    s += `<path d="M${x + w - 140} ${y} v150 a60 60 0 0 1 -120 0 v-50" fill="none" stroke="#b9b7b3" stroke-width="22" stroke-linecap="round"/>`;
+    s += bottle(x + 40, y + h - 8, 170, '#4f8fd6') + bottle(x + 100, y + h - 8, 140, '#7bc47f') + bottle(x + 160, y + h - 8, 190, '#f2b53d');
+    s += `<rect x="${x + w - 200}" y="${y + h - 120}" width="150" height="112" rx="10" fill="#e5ddd0"/>`;
   } else if (kind === 'base') {
-    sh(1);
-    s += `<rect class="ware2" x="${x + 60}" y="${y + h / 2 - 150}" width="160" height="136" rx="16"/>`;
-    s += `<rect class="ware" x="${x + 260}" y="${y + h - 200}" width="180" height="190" rx="10"/>`;
+    const mid = y + h * 0.48, bot = y + h - 6;
+    s += pot(x + 70, mid, 170, 100) + (w > 450 ? pot(x + 300, mid, 150, 80) : '');
+    s += pan(x + 40, bot, Math.min(240, w - 200)) + (w > 450 ? `<rect x="${x + w - 190}" y="${bot - 110}" width="150" height="110" rx="8" fill="#3c3835"/>` : '');
+    s += shelfAt(mid);
   } else if (kind === 'tall') {
-    sh(3);
+    const n = 3;
+    for (let k = 1; k <= n + 1; k++) {
+      const yy = y + (h / (n + 1)) * k - (k === n + 1 ? 6 : 0);
+      const row = k % 3;
+      s += row === 1 ? jar(x + 40, yy, 120, '#f1e4cc') + jar(x + 120, yy, 100, '#e8d7b9') + jar(x + 200, yy, 140, '#f3eadb') + snack(x + 290, yy, 120, 170, '#d9534f')
+        : row === 2 ? snack(x + 30, yy, 140, 190, '#f0ad4e') + snack(x + 180, yy, 110, 150, '#5bc0de') + bottle(x + 310, yy, 160, '#8b4a2b')
+        : bottle(x + 40, yy, 180, '#6b3d1f') + bottle(x + 100, yy, 150, '#b03a2e') + jar(x + 170, yy, 110, '#efe2c9') + snack(x + 260, yy, 150, 130, '#7aa95c');
+      if (k <= n) s += shelfAt(y + (h / (n + 1)) * k);
+    }
   }
+  s += `<rect x="${x}" y="${y}" width="${w}" height="${Math.min(120, h * .25)}" fill="url(#topShade)"/>`;
   return s;
 }
 
-/* 여닫이 도어: hinge = left | right | top(플랩) | slide(오른쪽으로 밀림) */
+/* 여닫이 도어: hinge = left | right | top(플랩) | slide(오른쪽으로 밀림)
+   좌우 여닫이는 90°를 넘겨 바깥으로 활짝 열리며, 넘어가는 순간 문 안쪽(흰 면)이 보임 */
 function swing(x, y, w, h, hinge, tip, inner = '', extra = '') {
-  return `<g class="sw hot" data-act="toggle" data-hinge="${hinge}" data-tip="${esc(tip)} · 눌러서 열기">
-    <g class="inside">${inner || inside(x, y, w, h)}</g>
-    <g class="leaf">${box(x, y, w, h, 'door')}${extra}</g>
+  const hx = hinge === 'left' ? x + 14 : x + w - 26;
+  const back = (hinge === 'left' || hinge === 'right') ? `<g class="face-b">
+      <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="3" fill="#f6f3ee" stroke="#cfc8bd" stroke-width="4"/>
+      <rect x="${x + 10}" y="${y + 10}" width="${w - 20}" height="${h - 20}" rx="2" fill="none" stroke="#e6e0d6" stroke-width="3"/>
+      <rect x="${hx}" y="${y + 50}" width="12" height="46" rx="4" fill="#a9a59f"/><rect x="${hx}" y="${y + h - 96}" width="12" height="46" rx="4" fill="#a9a59f"/>
+    </g>` : '';
+  const k = 'c' + (++SWK);
+  INS.push(`<g class="inside hot" data-act="toggle-k" data-k="${k}" data-tip="${esc(tip)} · 눌러서 닫기">${inner || inside(x, y, w, h)}</g>`);
+  return `<g class="sw hot" data-act="toggle" data-k="${k}" data-hinge="${hinge}" data-tip="${esc(tip)} · 눌러서 열기">
+    <g class="leaf"><g class="face-f">${box(x, y, w, h, 'door')}${extra}</g>${back}</g>
   </g>`;
 }
+let INS = [], SWK = 0;
+const withInteriors = svg => { const out = svg.replace('%%INS%%', `<g class="insides">${INS.join('')}</g>`); INS = []; return out; };
 
 function sinkSVG() {
-  D = 0;
+  D = 0; INS = [];
   const FL = 2300, CT = 1430, SLAB = 34, BT = CT + SLAB, TK = 2200, UB = 750, UT = 30, RB = FL - 150;
   let s = DEFS;
   s += solid(0, 0, 2960, FL, 'wall', 0);
@@ -849,6 +883,7 @@ function sinkSVG() {
     <rect class="t5g" x="40" y="${UB - 10}" width="2440" height="60" fill="#ffe7b0" filter="url(#soft)"/>
     <rect class="t5" x="50" y="${UB + 2}" width="2420" height="10" rx="5"/>
   </g>`;
+  s += '%%INS%%';
 
   // 상부장
   D = 0.2;
@@ -919,7 +954,7 @@ function sinkSVG() {
   s += dimH(0, 250, FL + 110, 'FA·200', false) + dimH(250, 850, FL + 110, '600', false) + dimH(850, 1410, FL + 110, '560', false) + dimH(1410, 2360, FL + 110, '950', false) + dimH(2510, 2960, FL + 110, '450', false);
   s += dimV(-60, CT, FL, '870');
   s += `<g class="fill" style="--d:2.4s"><path class="dim" d="M3020 ${RB}V${FL}"/><text class="dim-t" x="3050" y="${RB + 60}" text-anchor="start" style="text-anchor:start">150</text></g>`;
-  return `<svg class="dw" viewBox="-160 -260 3300 2800" role="img" aria-label="싱크대 정면도">${s}</svg>`;
+  return withInteriors(`<svg class="dw" viewBox="-160 -260 3300 2800" role="img" aria-label="싱크대 정면도">${s}</svg>`);
 }
 
 function planSVG() {
@@ -1137,11 +1172,12 @@ function pantry(x0, y0, x1, y1) {
 }
 
 function builtinSVG() {
-  D = 0;
+  D = 0; INS = [];
   const FL = 2300, TK = 2200, UT = 30, NT = 860, NB = 1460; // 니치(슬라이드장) 상하단
   let s = DEFS;
   s += solid(-200, 0, 3420, FL, 'wall', 0);
   s += solid(-200, FL, 3620, 40, 'floor', 0);
+  s += '%%INS%%';
   D = 0.15;
   s += box(-165, UT, 145, TK - UT, 'door', '태우기 165');
   s += box(-20, UT, 40, TK - UT, 'door', 'EP 20');
@@ -1185,7 +1221,7 @@ function builtinSVG() {
   s += dimH(0, 3220, -170, '3220');
   s += dimH(-165, 20, FL + 110, '165', false);
   s += dimV(3290, NT, NB, `${NB - NT}`);
-  return `<svg class="dw" viewBox="-300 -260 3700 2800" role="img" aria-label="냉장고장 정면도">${s}</svg>`;
+  return withInteriors(`<svg class="dw" viewBox="-300 -260 3700 2800" role="img" aria-label="냉장고장 정면도">${s}</svg>`);
 }
 
 const SPECS = {
@@ -1225,7 +1261,15 @@ function showView(v) {
 $('#stage').addEventListener('click', e => {
   const t = e.target.closest('[data-act]');
   if (!t || !t.closest('svg')) return;
-  if (t.dataset.act === 'toggle') t.classList.toggle('open');
+  if (t.dataset.act === 'toggle' || t.dataset.act === 'toggle-k') {
+    const sw = t.dataset.act === 'toggle-k' ? t.closest('svg').querySelector(`.sw[data-k="${t.dataset.k}"]`) : t;
+    if (!sw) return;
+    if (!sw.classList.contains('open') && sw.matches('.sw[data-hinge="left"], .sw[data-hinge="right"]')) {
+      sw.parentNode.appendChild(sw);     // 열리는 문을 다른 문들 위로
+      void sw.getBoundingClientRect();   // 이동 후 스타일 확정 → 전환 애니메이션 유지
+    }
+    requestAnimationFrame(() => sw.classList.toggle('open'));
+  }
   else if (t.dataset.act === 'robot') { t.classList.remove('go'); void t.getBoundingClientRect(); t.classList.add('go'); }
 });
 function moveInk() {
