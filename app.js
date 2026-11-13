@@ -769,8 +769,8 @@ function trendHTML(id) {
   const line = pts.map((p, k) => `${k ? 'L' : 'M'}${X(k).toFixed(1)} ${Y(p[1]).toFixed(1)}`).join('');
   const area = `${line}L${X(pts.length - 1).toFixed(1)} ${H - PB}L${X(0).toFixed(1)} ${H - PB}Z`;
   const kMin = ys.lastIndexOf(lo), kL = pts.length - 1;
-  const first = ys[0], last = ys[kL], diff = last - first;
-  const dTxt = diff === 0 ? '변동 없음' : `${diff < 0 ? '▼' : '▲'} ${won(Math.abs(diff))}`;
+  const first = ys[0], last = ys[kL], diff = last - first, gap = last - lo;
+  const weekTxt = diff === 0 ? '7일 전과 같음' : `7일 전보다 ${won(Math.abs(diff))} ${diff < 0 ? '내림' : '오름'}`;
   const dots = pts.map((p, k) => `<circle cx="${X(k).toFixed(1)}" cy="${Y(p[1]).toFixed(1)}" r="7" fill="transparent"><title>${esc(p[0])} · ${won(p[1])}</title></circle>`).join('');
   return `<div class="trend" title="에누리 최저가 · 최근 7일">
     <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-label="최근 7일 최저가 추이">
@@ -783,7 +783,7 @@ function trendHTML(id) {
       <text x="${W - PX}" y="${H - 2}" class="trend-x" text-anchor="end">${esc(pts[kL][0])}</text>
       ${dots}
     </svg>
-    <div class="trend-cap"><span>7일 최저 <b>${won(lo)}</b></span><span class="${diff < 0 ? 'down' : diff > 0 ? 'up' : ''}">${dTxt}</span></div>
+    <div class="trend-cap" title="${weekTxt}"><span>7일 최저 <b>${won(lo)}</b> <small>${esc(pts[kMin][0])}</small></span><span class="${gap > 0 ? 'up' : 'down'}">${gap > 0 ? `현재가 최저보다 +${won(gap)}` : '지금이 7일 최저가'}</span></div>
   </div>`;
 }
 function setChart(id, data, at) {
