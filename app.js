@@ -1235,15 +1235,15 @@ function fridgeInside(x, y, w, h, kind, top) {
 
 function fridge(x, y, w, h, label, kind, delay) {
   // 비스포크 키친핏 맥스 외관: 화이트 새틴 패널 + 블랙 가로 핸들 밴드 + 하단 다리
-  const B = 44, FEET = 34, GAP = 6, half = w / 2;
+  const B = 60, FEET = 34, GAP = 12, half = w / 2;
   const top = kind === 'kimchi' ? h * 0.5 : h * 0.57;   // 상단 도어 높이 비율
   const bodyB = y + h - FEET;
   const panel = (dx, dy, dw, dh) => `<rect x="${dx}" y="${dy}" width="${dw}" height="${dh}" rx="4" fill="url(#panel)" stroke="#d6d3ce" stroke-width="2"/>
     <rect x="${dx + 6}" y="${dy + 6}" width="${dw * 0.28}" height="${dh - 12}" rx="3" fill="#fff" opacity=".35"/>`;
   const door = (dx, dy, dw, dh, side) => `<g class="fdoor" data-h="${side}">${panel(dx, dy, dw, dh)}</g>`;
   const drawer = (dy, dh) => `<g class="fdrw">${panel(x + GAP, dy, w - GAP * 2, dh)}</g>`;
-  const band = (by) => `<rect x="${x}" y="${by}" width="${w}" height="${B}" fill="#1d1d1d"/>
-    <rect x="${x + 14}" y="${by + B - 12}" width="${w - 28}" height="5" rx="2" fill="#3a3a3a"/>`;
+  const band = (by) => `<rect x="${x}" y="${by}" width="${w}" height="${B}" fill="#0f0f0f"/>
+    <rect x="${x + 10}" y="${by + B - 16}" width="${w - 20}" height="6" rx="3" fill="#2c2c2c"/>`;
   const feet = `<rect x="${x + 8}" y="${bodyB}" width="${w - 16}" height="${FEET - 8}" fill="#2a2a2a"/>
     <rect x="${x + 30}" y="${y + h - 14}" width="60" height="14" rx="4" fill="#1a1a1a"/><rect x="${x + w - 90}" y="${y + h - 14}" width="60" height="14" rx="4" fill="#1a1a1a"/>`;
   let fronts = '';
@@ -1264,7 +1264,7 @@ function fridge(x, y, w, h, label, kind, delay) {
   const name = label.split(' · ')[0];
   return `<g class="slide-in" style="--d:${delay}s">
     <g class="frg hot" data-act="toggle" data-tip="${esc(label)} — 눌러서 열기">
-      <rect x="${x}" y="${y}" width="${w}" height="${h - FEET + 4}" rx="6" fill="#1f1f1f"/>
+      <rect x="${x}" y="${y}" width="${w}" height="${h - FEET + 4}" rx="6" fill="#121212"/>
       <g class="fin">${fridgeInside(x, y, w, h - FEET, kind, top)}</g>
       ${feet}
       ${bands}
