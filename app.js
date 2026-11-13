@@ -60,7 +60,7 @@ function defaults() {
           { label: '상판 업그레이드', spec: '크레모사 · 2960/1570/1160', amount: 2530000 },
           { label: '대리석 벽체', spec: '크레모사 · 2560', amount: 1408000 },
           { label: '조명', spec: 'T5 · 라인조명 1EA', amount: 440000 },
-          { label: '싱크볼', spec: '백조 깜포르테 860', amount: 715000 },
+          { label: '싱크볼', spec: '백조 깜포르테 860+', amount: 715000 },
           { label: '견적 할인 (D.C)', spec: '전체 견적 기준', amount: -616000 },
         ],
       },
@@ -117,7 +117,7 @@ function migrate(st) {
   if ((st.version || 1) >= 2) return migrate3(st);
   for (const it of st.items) {
     if (it.note) it.note = it.note.replace('페닌슐라 하부 로봇청소기', '키큰장 하부 로봇청소기');
-    (it.lines || []).forEach(l => { if (l.spec === '깜뽀르테 860') l.spec = '백조 깜포르테 860'; });
+    (it.lines || []).forEach(l => { if (l.spec === '깜뽀르테 860') l.spec = '백조 깜포르테 860+'; });
     for (const k in SPEC) {
       if ((it.model || '').includes(SPEC[k].code)) { it.size ||= SPEC[k].size; it.img ||= SPEC[k].img; }
     }
@@ -145,6 +145,7 @@ function ensureEtc(st) {
   return added;
 }
 const OLD_STONE = String.fromCharCode(0xD55C, 0xC2A4, 0xD1A4); // 이전 표기
+const SINK_RE = /깜포르테 860(?!\+)/g;
 const TEXT_FIX = [[OLD_STONE, '칸스톤'], ['영림 듄 선셋'.concat(' 스톤'), '한솔 포그 그레이']];
 function fixStone(st) {
   let changed = false;
@@ -152,6 +153,10 @@ function fixStone(st) {
     for (const [a, b] of TEXT_FIX) {
       if (typeof it[f] === 'string' && it[f].includes(a)) { it[f] = it[f].split(a).join(b); changed = true; }
     }
+    if (typeof it[f] === 'string' && SINK_RE.test(it[f])) { it[f] = it[f].replace(SINK_RE, '깜포르테 860+'); changed = true; }
+  }
+  for (const it of st.items) for (const l of it.lines || []) {
+    if (typeof l.spec === 'string' && SINK_RE.test(l.spec)) { l.spec = l.spec.replace(SINK_RE, '깜포르테 860+'); changed = true; }
   }
   return changed;
 }
@@ -718,7 +723,7 @@ addEventListener('scroll', () => previewFor && hidePreview(), { passive: true })
 const tip = $('#tip');
 // 도면 설명: '눌러서 열기/닫기/켜기…' 안내와 치수는 빼고 이름만 (예: '후드장 900 · 눌러서 열기' → '후드장')
 function drawingTip(txt) {
-  const keep = ['TS-100', '깜포르테 860'];
+  const keep = ['TS-100', '깜포르테 860+'];
   let t = txt;
   keep.forEach((k, i) => { t = t.split(k).join(`@@${i}@@`); });
   t = t.split(/\s*[·—]\s*/).filter(seg => !seg.includes('눌러')).join(' · ');
@@ -1074,7 +1079,7 @@ function sinkSVG() {
   const SPX = 1880, SY = CT - 236;
   let streams = '';
   for (let k = 0; k < 7; k++) streams += `<line x1="${SPX - 66 + k * 22}" y1="${SY + 16}" x2="${SPX - 66 + k * 22}" y2="${CT}" style="animation-delay:${-k * 0.13}s"/>`;
-  s += `<g class="sink hot" data-act="toggle" data-tip="백조 깜포르테 860 · 폭포수전 — 눌러서 물 틀기">
+  s += `<g class="sink hot" data-act="toggle" data-tip="백조 깜포르테 860+ · 폭포수전 — 눌러서 물 틀기">
     <rect class="fill" x="1560" y="${CT - 6}" width="640" height="10" fill="url(#steel)" style="--d:2s"/>
     <g class="fill faucet" style="--d:2.1s" data-tip="하츠 TS-100 폭포수전 — 눌러서 물 틀기">
       <rect x="${SPX - 22}" y="${CT - 300}" width="44" height="300" rx="6" fill="url(#steel)" stroke="#8d8a86" stroke-width="3"/>
@@ -1123,11 +1128,11 @@ function planSVG() {
       <g class="ind-ui"><circle cx="350" cy="490" r="9"/><circle cx="380" cy="490" r="9"/><circle cx="410" cy="490" r="9"/></g></g>
   </g>`;
 
-  // 백조 깜포르테 860: 새틴 스테인리스 볼 + 가운데 원형 배수구 커버 + 폭포수전 (클릭하면 물)
+  // 백조 깜포르테 860+: 새틴 스테인리스 볼 + 가운데 원형 배수구 커버 + 폭포수전 (클릭하면 물)
   const DX = 1880, DY = 330;
   let flow = '';
   for (let k = 0; k < 8; k++) flow += `<line x1="${DX - 70 + k * 20}" y1="132" x2="${DX - 80 + k * 23}" y2="${DY - 40}" style="animation-delay:${-k * 0.11}s"/>`;
-  s += `<g class="sink hot" data-act="toggle" data-tip="백조 깜포르테 860 · 폭포수전 — 눌러서 물 틀기">
+  s += `<g class="sink hot" data-act="toggle" data-tip="백조 깜포르테 860+ · 폭포수전 — 눌러서 물 틀기">
     <g class="fill" style="--d:${nd()}s">
       <rect x="1440" y="78" width="880" height="464" rx="26" fill="url(#rim)" stroke="#8d8a86" stroke-width="4"/>
       <rect x="1462" y="100" width="836" height="420" rx="34" fill="url(#bowlWall)"/>
@@ -1135,7 +1140,7 @@ function planSVG() {
       <path d="M1478 168H2282" stroke="#e9e8e5" stroke-width="7" stroke-linecap="round" opacity=".9"/>
       <path d="M1478 176H2282" stroke="#9a9894" stroke-width="3" stroke-linecap="round" opacity=".6"/>
       <rect x="1500" y="150" width="760" height="338" rx="26" fill="none" stroke="#b9b7b3" stroke-width="3"/>
-      <text x="${DX}" y="140" text-anchor="middle" font-size="22" fill="#8e8c88" font-weight="600" letter-spacing="1">Camforte</text>
+      <text x="${DX}" y="140" text-anchor="middle" font-size="22" fill="#8e8c88" font-weight="600" letter-spacing="1">Camforte 860+</text>
       <g data-tip="깜포르테 원형 배수구 커버">
         <circle cx="${DX}" cy="${DY}" r="96" fill="#5f5d5a"/>
         <circle cx="${DX}" cy="${DY}" r="90" fill="url(#drainCover)" stroke="#8a8884" stroke-width="2"/>
@@ -1209,7 +1214,7 @@ function planSVG() {
 
   // 라벨 (가려지지 않게 상판 밖 아래쪽으로)
   s += `<text class="lbl fill" x="560" y="690" style="--d:1.4s">인덕션 3구</text>`;
-  s += `<text class="lbl fill" x="1880" y="690" style="--d:1.45s">싱크볼</text><text class="lbl-s fill" x="1880" y="760" style="--d:1.47s">백조 깜포르테 860</text>`;
+  s += `<text class="lbl fill" x="1880" y="690" style="--d:1.45s">싱크볼</text><text class="lbl-s fill" x="1880" y="760" style="--d:1.47s">백조 깜포르테 860+</text>`;
   s += ``;
   s += `<text class="lbl-s fill" x="2735" y="560" style="--d:1.5s">로봇청소기</text>`;
   D = 1.5;
@@ -1409,12 +1414,12 @@ function builtinSVG() {
 const SPECS = {
   sink: [
     ['규격', 'ㄱ자 2960 × 1570'], ['도어', '한솔 포그 그레이'], ['상판', '칸스톤 크레모사'],
-    ['벽체', '크레모사 2560'], ['조명', 'T5 간접 + 라인조명'], ['싱크볼', '백조 깜포르테 860'],
+    ['벽체', '크레모사 2560'], ['조명', 'T5 간접 + 라인조명'], ['싱크볼', '백조 깜포르테 860+'],
     ['수전', '하츠 TS-100 폭포수전'], ['보조주방', '1060 × 650'], ['타일', '300×600 덧방'], ['로봇청소기', '드리미 L10s Ultra Heat · 키큰장 하부 150'],
   ],
   plan: [
     ['주방', '2960 (D 600)'], ['페닌슐라', '1570 × 720 · 식기세척기'], ['보조주방', '1060 × 650 (ㄱ자)'],
-    ['인덕션', '3구'], ['싱크볼', '백조 깜포르테 860'], ['수전', '하츠 TS-100'], ['상판 길이', '2960 / 1570 / 1160'], ['로봇청소기', '드리미 L10s Ultra Heat'],
+    ['인덕션', '3구'], ['싱크볼', '백조 깜포르테 860+'], ['수전', '하츠 TS-100'], ['상판 길이', '2960 / 1570 / 1160'], ['로봇청소기', '드리미 L10s Ultra Heat'],
   ],
   builtin: [
     ['규격', '3220 × 855'], ['구성', '980 · 915/805 · 450'], ['내부', 'ㄱ자 팬트리장'], ['조명', 'H5 조명'],
