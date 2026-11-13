@@ -691,12 +691,18 @@ function toast(msg, actionLabel, action) {
 const preview = $('#preview');
 let previewFor = null;
 function showPreview(card) {
-  const it = state.items.find(i => i.id === card.dataset.id);
-  if (!it?.img) return;
+  let src, cap;
+  if (card.dataset.photo) { src = card.dataset.photo; cap = `<b>${esc(card.dataset.photoCap || '')}</b>`; }
+  else {
+    const it = state.items.find(i => i.id === card.dataset.id);
+    if (!it?.img) return;
+    src = it.img; cap = `<b>${esc(it.name)}</b>${it.size ? `<span>${esc(it.size)}</span>` : ''}`;
+  }
   previewFor = card;
+  preview.classList.toggle('photo', !!card.dataset.photo);
   const img = preview.querySelector('img');
-  if (img.getAttribute('src') !== it.img) img.src = it.img;
-  preview.querySelector('figcaption').innerHTML = `<b>${esc(it.name)}</b>${it.size ? `<span>${esc(it.size)}</span>` : ''}`;
+  if (img.getAttribute('src') !== src) img.src = src;
+  preview.querySelector('figcaption').innerHTML = cap;
   const r = card.getBoundingClientRect();
   const W = 240, H = 300;
   let left = r.right + 14;
@@ -711,14 +717,14 @@ function showPreview(card) {
 function hidePreview() { previewFor = null; preview.classList.remove('show'); }
 document.addEventListener('pointerover', e => {
   if (e.pointerType !== 'mouse') return;
-  const card = e.target.closest?.('.card.has-img');
+  const card = e.target.closest?.('.card.has-img, [data-photo]');
   if (card && card !== previewFor) showPreview(card);
   else if (!card && previewFor) hidePreview();
 });
 document.addEventListener('click', e => {
   const b = e.target.closest('[data-act="photo"]');
   if (b) { e.stopPropagation(); const c = b.closest('.card'); previewFor === c ? hidePreview() : showPreview(c); }
-  else if (previewFor && !e.target.closest('.card.has-img')) hidePreview();
+  else if (previewFor && !e.target.closest('.card.has-img, [data-photo]')) hidePreview();
 }, true);
 addEventListener('scroll', () => previewFor && hidePreview(), { passive: true });
 
@@ -1290,11 +1296,95 @@ const banchan = (x, y, food, w = 150) => `<rect x="${x}" y="${y - 92}" width="${
 const meat = (x, y, w = 190, h = 70) => `<rect x="${x}" y="${y - h}" width="${w}" height="${h}" rx="10" fill="#b8473f"/>
   <path d="M${x + 20} ${y - h + 20}q${w / 4} 14 ${w / 2} 0t${w / 2 - 40} 6M${x + 26} ${y - 22}q${w / 3} -12 ${w - 60} 4" stroke="#f3d6cf" stroke-width="7" fill="none" stroke-linecap="round"/>
   <rect x="${x}" y="${y - h}" width="${w}" height="${h}" rx="10" fill="#fff" opacity=".32"/><rect x="${x + w - 64}" y="${y - h + 10}" width="50" height="22" rx="4" fill="#fff" opacity=".9"/>`;
-const kimchiTong = (x, y, w = 330, h = 190) => `<rect x="${x}" y="${y - h}" width="${w}" height="${h}" rx="16" fill="#f6f2ec" stroke="#cfc6ba" stroke-width="3"/>
-  <rect x="${x + 12}" y="${y - h + 40}" width="${w - 24}" height="${h - 54}" rx="10" fill="#c43b2a"/>
-  ${[0, 1, 2, 3].map(k => `<path d="M${x + 30 + k * (w - 60) / 3} ${y - h + 52}q18 40 0 ${h - 80}" stroke="#f1d39b" stroke-width="12" fill="none" stroke-linecap="round" opacity=".85"/>`).join('')}
-  <rect x="${x + 12}" y="${y - h + 40}" width="${w - 24}" height="${h - 54}" rx="10" fill="#fff" opacity=".18"/>
-  <rect x="${x - 6}" y="${y - h - 6}" width="${w + 12}" height="34" rx="10" fill="#7a8f74"/>`;
+/* 김치: 통 종류 + 김치 종류 */
+let _sd = 7; const rnd = () => (_sd = (_sd * 9301 + 49297) % 233280) / 233280;
+const kBaechu = (x, y, w, h) => { let o = `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#a82a1a"/>`;
+  const n = Math.max(2, Math.round(w / 110));
+  for (let k = 0; k < n; k++) { const cx = x + (k + 0.5) * w / n, cy = y + h * 0.55, rx = w / n * 0.55, ry = h * 0.42;
+    o += `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="#cf4a2c"/>`;
+    for (let j = 0; j < 4; j++) o += `<path d="M${cx - rx * 0.7 + j * rx * 0.35} ${cy - ry * 0.8}q${rx * 0.25} ${ry * 0.8} ${-rx * 0.05} ${ry * 1.55}" stroke="#f4e2b0" stroke-width="${7 - j}" fill="none" stroke-linecap="round" opacity=".9"/>`;
+    o += `<path d="M${cx - rx * 0.9} ${cy}q${rx} ${-ry * 0.3} ${rx * 1.8} ${ry * 0.1}" stroke="#e7f0c8" stroke-width="5" fill="none" opacity=".55"/>`; }
+  return o; };
+const kChonggak = (x, y, w, h) => { let o = `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#9e2617"/>`;
+  const n = Math.max(3, Math.round(w / 70));
+  for (let k = 0; k < n; k++) { const cx = x + 30 + k * (w - 60) / (n - 1), cy = y + h * (0.62 + (k % 2) * 0.12), r = 26 + (k % 3) * 4;
+    o += `<path d="M${cx} ${cy - r * 1.2}q${-30 - k % 2 * 10} ${-h * 0.3} ${-10 - k * 3} ${-h * 0.45}M${cx + 4} ${cy - r * 1.2}q${16} ${-h * 0.32} ${22} ${-h * 0.5}" stroke="#3e7a2a" stroke-width="9" fill="none" stroke-linecap="round"/>`;
+    o += `<ellipse cx="${cx}" cy="${cy}" rx="${r}" ry="${r * 1.45}" fill="#f1dcc4"/><ellipse cx="${cx}" cy="${cy}" rx="${r}" ry="${r * 1.45}" fill="#c8361f" opacity=".55"/>
+      <ellipse cx="${cx - r * 0.35}" cy="${cy - r * 0.3}" rx="${r * 0.25}" ry="${r * 0.6}" fill="#fff" opacity=".35"/>`; }
+  return o; };
+const kPa = (x, y, w, h) => { let o = `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#8f2416"/>`;
+  for (let k = 0; k < Math.round(w / 9); k++) { const x0 = x + rnd() * w, y0 = y + h * (0.15 + rnd() * 0.2);
+    const c = ['#2f6b2a', '#4c8c3a', '#3a7a30', '#b8361f'][k % 4];
+    o += `<path d="M${x0} ${y0}q${(rnd() - 0.5) * 80} ${h * 0.4} ${(rnd() - 0.5) * 60} ${h * 0.75}" stroke="${c}" stroke-width="${5 + rnd() * 4}" fill="none" stroke-linecap="round"/>`; }
+  for (let k = 0; k < Math.round(w / 40); k++) o += `<rect x="${x + rnd() * (w - 20)}" y="${y + h * 0.82 + rnd() * h * 0.1}" width="16" height="9" rx="4" fill="#efe6cf"/>`;
+  return o; };
+const kKkakdugi = (x, y, w, h) => { let o = `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#a3301b"/>`;
+  for (let r = 0; r * 40 < h - 20; r++) for (let c = 0; c * 42 < w - 20; c++) {
+    const cx = x + 8 + c * 42 + (r % 2) * 14, cy = y + h - 44 - r * 38; if (cx + 36 > x + w) continue;
+    o += `<g transform="rotate(${(rnd() - 0.5) * 24} ${cx + 17} ${cy + 17})"><rect x="${cx}" y="${cy}" width="34" height="34" rx="6" fill="#d4552f"/><path d="M${cx + 4} ${cy + 4}h26l-6 9h-18z" fill="#f0a27a"/></g>`; }
+  return o; };
+const KIMCHI = { baechu: [kBaechu, '배추김치'], chonggak: [kChonggak, '총각김치'], pa: [kPa, '파김치'], kkakdugi: [kKkakdugi, '깍두기'] };
+// 통 종류: wine(와인색 반투명 김치통) / clear(투명 밀폐용기) / green(초록 뚜껑 사각통)
+function kimchiTong(x, y, w, h, type = 'baechu', style = 'wine') {
+  const [fn, name] = KIMCHI[type]; const lid = style === 'clear' ? 26 : 36, ty = y - h;
+  const cx = x + 10, cw = w - 20, cy = ty + lid + 14, ch = h - lid - 24;
+  let o = `<g data-tip="${name}">`;
+  o += `<clipPath id="kc${Math.round(x)}_${Math.round(y)}"><rect x="${cx}" y="${cy}" width="${cw}" height="${ch}" rx="10"/></clipPath>`;
+  o += `<g clip-path="url(#kc${Math.round(x)}_${Math.round(y)})">${fn(cx, cy, cw, ch)}</g>`;
+  if (style === 'wine') {
+    o += `<rect x="${x}" y="${ty + lid}" width="${w}" height="${h - lid}" rx="18" fill="#6e1622" opacity=".42" stroke="#5a121c" stroke-width="5"/>
+      <rect x="${x - 6}" y="${ty}" width="${w + 12}" height="${lid + 8}" rx="12" fill="#5c1420"/>
+      <rect x="${x + w * 0.3}" y="${ty - 14}" width="${w * 0.4}" height="18" rx="8" fill="#4a0f19"/>
+      <rect x="${x - 12}" y="${ty + lid - 4}" width="18" height="40" rx="6" fill="#4a0f19"/><rect x="${x + w - 6}" y="${ty + lid - 4}" width="18" height="40" rx="6" fill="#4a0f19"/>
+      <rect x="${x + 8}" y="${ty + lid + 8}" width="14" height="${h - lid - 24}" rx="7" fill="#fff" opacity=".18"/>`;
+  } else if (style === 'clear') {
+    o += `<rect x="${x}" y="${ty + lid}" width="${w}" height="${h - lid}" rx="14" fill="#dfeaf0" opacity=".28" stroke="#aebdc5" stroke-width="4"/>
+      <rect x="${x - 4}" y="${ty}" width="${w + 8}" height="${lid + 6}" rx="8" fill="#e9eff2" stroke="#b9c6cc" stroke-width="3"/>
+      ${[0.15, 0.85].map(f => `<rect x="${x + w * f - 22}" y="${ty + lid - 2}" width="44" height="22" rx="5" fill="#cfdbe1" stroke="#a9b8c0" stroke-width="2"/>`).join('')}
+      <rect x="${x + 10}" y="${ty + lid + 10}" width="${w * 0.35}" height="10" rx="5" fill="#fff" opacity=".55"/>`;
+  } else {
+    o += `<rect x="${x}" y="${ty + lid}" width="${w}" height="${h - lid}" rx="14" fill="#f6f2ec" opacity=".3" stroke="#cfc6ba" stroke-width="4"/>
+      <rect x="${x - 6}" y="${ty}" width="${w + 12}" height="${lid + 6}" rx="10" fill="#6f8f68"/>`;
+  }
+  o += `<rect x="${x + w / 2 - 70}" y="${ty + 6}" width="140" height="30" rx="4" fill="#fbf6e8" opacity=".95" transform="rotate(-2 ${x + w / 2} ${ty + 20})"/>
+    <text x="${x + w / 2}" y="${ty + 29}" text-anchor="middle" font-size="22" font-weight="700" fill="#5a3b2a">${name}</text></g>`;
+  return o;
+}
+
+/* 냉동 고기: 항정살 · 꽃등심 · 삼겹살 */
+const frost = (x, y, w, h) => { let o = `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="10" fill="#f4fbff" opacity=".26"/><rect x="${x + 3}" y="${y + 3}" width="${w - 6}" height="${h - 6}" rx="9" fill="none" stroke="#fff" stroke-width="6" opacity=".55"/>`;
+  for (let k = 0; k < Math.round(w * h / 2500); k++) o += `<circle cx="${x + 8 + rnd() * (w - 16)}" cy="${y + 8 + rnd() * (h - 16)}" r="${1.5 + rnd() * 2.5}" fill="#fff" opacity=".75"/>`;
+  return o; };
+const hangjeong = (x, y, w, h) => { const t = y - h; let o = `<g data-tip="항정살 (냉동)">
+  <rect x="${x}" y="${t}" width="${w}" height="${h}" rx="14" fill="#f7f7f5" stroke="#d6d6d1" stroke-width="3"/>
+  <rect x="${x + 10}" y="${t + 10}" width="${w - 20}" height="${h - 20}" rx="10" fill="#ecebe6"/>`;
+  const n = Math.max(4, Math.floor((w - 30) / 28));
+  for (let k = 0; k < n; k++) { const x0 = x + 18 + k * (w - 50) / n, b = h - 34;
+    o += `<path d="M${x0} ${t + 16}q14 ${b / 2} -4 ${b}l22 2q16 ${-b / 2} 2 ${-b - 2}z" fill="${k % 2 ? '#f1bdb5' : '#eeb0a8'}"/>
+      <path d="M${x0 + 8} ${t + 22}q10 ${b / 2} -2 ${b - 12}" stroke="#fff6f1" stroke-width="3" fill="none" opacity=".9"/>`; }
+  o += `<rect x="${x + w * 0.62}" y="${t + h * 0.5}" width="${w * 0.32}" height="${h * 0.4}" rx="3" fill="#fff"/>
+    <rect x="${x + w * 0.62}" y="${t + h * 0.76}" width="${w * 0.32}" height="${h * 0.14}" fill="#f2c12e"/>
+    <text x="${x + w * 0.78}" y="${t + h * 0.7}" text-anchor="middle" font-size="18" font-weight="800" fill="#c0392b">항정살</text>`;
+  return o + frost(x, t, w, h) + '</g>'; };
+const deungsim = (x, y, w, h) => { const t = y - h, n = 3, cw = (w - 16) / n; let o = `<g data-tip="꽃등심 (냉동)">
+  <rect x="${x}" y="${t}" width="${w}" height="${h}" rx="10" fill="#141414" stroke="#3a3a3a" stroke-width="3"/>`;
+  for (let k = 0; k < n; k++) { const cx = x + 8 + k * cw, ct = t + 10;
+    o += `<rect x="${cx + 3}" y="${ct}" width="${cw - 6}" height="${h - 20}" rx="6" fill="#262626"/>
+      <path d="M${cx + 10} ${ct + 14}q${cw * 0.4} -10 ${cw - 24} 6q8 ${h * 0.3} -4 ${h - 50}q${-cw * 0.4} 10 ${-cw + 30} -4q-10 ${-h * 0.3} 0 ${-h + 52}z" fill="${['#9b1c28', '#a52530', '#8f1a25'][k]}"/>`;
+    for (let j = 0; j < 9; j++) { const mx = cx + 16 + rnd() * (cw - 40), my = ct + 18 + rnd() * (h - 60);
+      o += `<path d="M${mx} ${my}q${8 + rnd() * 14} ${(rnd() - 0.5) * 16} ${16 + rnd() * 20} ${(rnd() - 0.5) * 10}" stroke="#fbeeee" stroke-width="${1.8 + rnd() * 1.6}" fill="none" stroke-linecap="round" opacity=".9"/>`; }
+    o += `<circle cx="${cx + cw - 20}" cy="${ct + 18}" r="11" fill="#c9a33a" stroke="#8a6d1f" stroke-width="2"/>`; }
+  return o + frost(x, t, w, h) + '</g>'; };
+const samgyeop = (x, y, w, h) => { const t = y - h; let o = `<g class="photo-hot" data-tip="삼겹살 (냉동)" data-photo="assets/food/samgyeopsal.jpg" data-photo-cap="삼겹살 · 구우면 이렇게 🔥">
+  <rect x="${x}" y="${t}" width="${w}" height="${h}" rx="10" fill="#f3f6f8" stroke="#c4cfd6" stroke-width="3"/>`;
+  const rows = Math.max(2, Math.floor((h - 24) / 30));
+  for (let r = 0; r < rows; r++) { const ry = t + 14 + r * (h - 28) / rows, rh = (h - 28) / rows + 6, sh = (r % 2) * 18;
+    o += `<rect x="${x + 12 + sh}" y="${ry}" width="${w - 30 - sh}" height="${rh}" rx="7" fill="#eeaaa4" stroke="#d98c86" stroke-width="1.5"/>
+      <rect x="${x + 14 + sh}" y="${ry + rh * 0.28}" width="${w - 34 - sh}" height="${rh * 0.16}" fill="#fbf1ea"/>
+      <rect x="${x + 14 + sh}" y="${ry + rh * 0.62}" width="${w - 34 - sh}" height="${rh * 0.12}" fill="#fbf1ea"/>`; }
+  o += `<rect x="${x + 10}" y="${t + 8}" width="${Math.min(130, w * 0.42)}" height="34" rx="4" fill="#2f6fb5"/>
+    <text x="${x + 10 + Math.min(130, w * 0.42) / 2}" y="${t + 32}" text-anchor="middle" font-size="19" font-weight="800" fill="#fff">냉동 삼겹살</text>`;
+  return o + frost(x, t, w, h) + '</g>'; };
 
 function fridgeInside(x, y, w, h, kind, top) {
   const g = 14, ix = x + g, iw = w - g * 2;
@@ -1322,22 +1412,29 @@ function fridgeInside(x, y, w, h, kind, top) {
     s += `<rect x="${ix}" y="${by}" width="${iw}" height="${bh}" rx="6" fill="#e3eef5"/>`;
     const d1 = by + bh * 0.48;
     s += `<rect x="${ix + 10}" y="${d1}" width="${iw - 20}" height="10" fill="#c7d8e3"/>`;
-    s += meat(ix + 30, d1 - 6) + meat(ix + 240, d1 - 6, 210, 80) + meat(ix + 470, d1 - 6, 170) + meat(ix + 660, d1 - 6, 190, 60);
-    s += meat(ix + 40, d1 - 86, 230, 60) + meat(ix + 300, d1 - 92, 200, 66) + meat(ix + 530, d1 - 72, 240, 56);
-    s += meat(ix + 30, by + bh - 20, 260, 90) + meat(ix + 320, by + bh - 20, 200, 80) + meat(ix + 550, by + bh - 20, 260, 86);
-    s += meat(ix + 80, by + bh - 110, 220, 70) + meat(ix + 380, by + bh - 106, 260, 66);
+    _sd = 11;
+    // 위 칸: 꽃등심 선물세트 + 항정살 + 삼겹살, 오른쪽엔 세워둔 삼겹살
+    s += deungsim(ix + 16, d1 - 4, 390, 140) + hangjeong(ix + 30, d1 - 150, 300, 112);
+    s += hangjeong(ix + 420, d1 - 4, 290, 120) + samgyeop(ix + 430, d1 - 130, 270, 106);
+    s += samgyeop(ix + 724, d1 - 4, 146, 226);
+    // 아래 바스켓: 삼겹살 + 꽃등심 + 항정살
+    const fb = by + bh - 20;
+    s += samgyeop(ix + 16, fb, 340, 140) + hangjeong(ix + 30, fb - 146, 310, 112);
+    s += deungsim(ix + 372, fb, 380, 146) + samgyeop(ix + 392, fb - 152, 330, 120);
+    s += hangjeong(ix + 766, fb, 104, 210);
     s += `<rect x="${ix}" y="${by}" width="${iw}" height="${bh}" rx="6" fill="#ffffff" opacity=".12"/>`;
     s += `<text class="lbl-s" x="${x + w / 2}" y="${by + 50}" style="fill:#5c7a8a">냉동실</text>`;
   } else {
     const s1 = fy + fh * 0.5;
     s += shelf(s1);
-    s += kimchiTong(ix + 30, s1 - 6) + kimchiTong(ix + 390, s1 - 6, 310);
-    s += kimchiTong(ix + 30, fy + fh - 10, 330, 200) + kimchiTong(ix + 390, fy + fh - 10, 310, 200);
+    _sd = 23;
+    s += kimchiTong(ix + 24, s1 - 6, 360, 300, 'baechu', 'wine') + kimchiTong(ix + 410, s1 - 6, 330, 210, 'kkakdugi', 'clear');
+    s += kimchiTong(ix + 24, fy + fh - 10, 360, 250, 'chonggak', 'clear') + kimchiTong(ix + 410, fy + fh - 10, 330, 230, 'pa', 'green');
     s += `<rect x="${ix}" y="${by}" width="${iw}" height="${bh}" rx="6" fill="#f3f6f8"/>`;
     const d1 = by + bh * 0.5;
     s += `<rect x="${ix + 10}" y="${d1}" width="${iw - 20}" height="10" fill="#d4dde3"/>`;
-    s += kimchiTong(ix + 40, d1 - 8, 300, 220) + kimchiTong(ix + 380, d1 - 8, 300, 220);
-    s += kimchiTong(ix + 40, by + bh - 20, 300, 230) + kimchiTong(ix + 380, by + bh - 20, 300, 230);
+    s += kimchiTong(ix + 30, d1 - 8, 340, 230, 'kkakdugi', 'wine') + kimchiTong(ix + 400, d1 - 8, 330, 240, 'baechu', 'clear');
+    s += kimchiTong(ix + 30, by + bh - 20, 340, 250, 'chonggak', 'wine') + kimchiTong(ix + 400, by + bh - 20, 330, 230, 'pa', 'clear');
   }
   return s;
 }
