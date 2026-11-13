@@ -400,3 +400,14 @@ details.lines tr.neg td:last-child{color:#b4553f}
 @media (max-width:640px){.sync-pill{display:flex;width:fit-content;margin:8px 0 0}.auth-btn:not(.in){padding:0 10px 0 6px}}
 .nav a{white-space:nowrap}
 @media (max-width:1000px){.nav{display:none}.top-actions{margin-left:auto}}
+
+/* fridge doors */
+.dw .fdoor{transform-box:fill-box;transition:transform .85s cubic-bezier(.55,0,.2,1)}
+.dw .fdoor[data-h="l"]{transform-origin:left center}
+.dw .fdoor[data-h="r"]{transform-origin:right center}
+.dw .frg.open .fdoor[data-h="l"]{transform:perspective(7000px) rotateY(-87deg)}
+.dw .frg.open .fdoor[data-h="r"]{transform:perspective(7000px) rotateY(87deg)}
+.dw .frg .fin{opacity:0;transition:opacity .3s}
+.dw .frg.open .fin{opacity:1}
+.dw .frg .fname{transition:opacity .3s}
+.dw .frg.open .fname{opacity:0}

@@ -655,14 +655,21 @@ document.addEventListener('click', e => {
 addEventListener('scroll', () => previewFor && hidePreview(), { passive: true });
 
 const tip = $('#tip');
+let tipEl = null, tipT;
 document.addEventListener('pointermove', e => {
   const t = e.target.closest?.('[data-tip]');
-  if (!t) { tip.classList.remove('show'); return; }
-  tip.textContent = t.dataset.tip;
+  if (!t) { tip.classList.remove('show'); tipEl = null; clearTimeout(tipT); return; }
+  if (t !== tipEl) {
+    tipEl = t;
+    tip.textContent = t.dataset.tip;
+    tip.classList.add('show');
+    clearTimeout(tipT);
+    tipT = setTimeout(() => tip.classList.remove('show'), 3000); // 같은 곳에 3초 머물면 사라짐
+  }
+  if (!tip.classList.contains('show')) return;
   const w = tip.offsetWidth;
   tip.style.left = Math.min(innerWidth - w - 8, Math.max(8, e.clientX - w / 2)) + 'px';
   tip.style.top = (e.clientY - 42) + 'px';
-  tip.classList.add('show');
 });
 
 /* ---------------- Enuri live price ---------------- */
@@ -756,6 +763,10 @@ const DEFS = `<defs>
   <linearGradient id="bowl" x1="0" y1="0" x2="0" y2="1">
     <stop offset="0" stop-color="#8e8c88"/><stop offset="1" stop-color="#b9b7b3"/>
   </linearGradient>
+  <linearGradient id="rim" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e4e3e0"/><stop offset=".5" stop-color="#c3c1bd"/><stop offset="1" stop-color="#dcdad6"/></linearGradient>
+  <linearGradient id="bowlWall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a9a7a3"/><stop offset=".25" stop-color="#cfcdc9"/><stop offset="1" stop-color="#bdbbb7"/></linearGradient>
+  <linearGradient id="bowlFloor" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d9d8d5"/><stop offset=".55" stop-color="#c9c7c3"/><stop offset="1" stop-color="#dedcd9"/></linearGradient>
+  <radialGradient id="drainCover" cx=".42" cy=".38" r=".7"><stop offset="0" stop-color="#f6f6f4"/><stop offset=".6" stop-color="#d4d3d0"/><stop offset="1" stop-color="#a8a6a2"/></radialGradient>
   <radialGradient id="heat"><stop offset="0" stop-color="#ffb347"/><stop offset=".55" stop-color="#ff5a2a"/><stop offset="1" stop-color="#c81e0a" stop-opacity="0"/></radialGradient>
   <linearGradient id="waterG" x1="0" y1="0" x2="0" y2="1">
     <stop offset="0" stop-color="#d7eefa" stop-opacity=".95"/><stop offset="1" stop-color="#a9d6ee" stop-opacity=".55"/>
@@ -936,34 +947,39 @@ function planSVG() {
       <g class="ind-ui"><circle cx="350" cy="490" r="9"/><circle cx="380" cy="490" r="9"/><circle cx="410" cy="490" r="9"/></g></g>
   </g>`;
 
-  // 백조 깜포르테 860 + 고급 배수구 + 폭포수전 (클릭하면 물)
+  // 백조 깜포르테 860: 새틴 스테인리스 볼 + 가운데 원형 배수구 커버 + 폭포수전 (클릭하면 물)
+  const DX = 1880, DY = 330;
   let flow = '';
-  for (let k = 0; k < 8; k++) flow += `<line x1="${1810 + k * 20}" y1="132" x2="${1800 + k * 23}" y2="300" style="animation-delay:${-k * 0.11}s"/>`;
+  for (let k = 0; k < 8; k++) flow += `<line x1="${DX - 70 + k * 20}" y1="132" x2="${DX - 80 + k * 23}" y2="${DY - 40}" style="animation-delay:${-k * 0.11}s"/>`;
   s += `<g class="sink hot" data-act="toggle" data-tip="백조 깜포르테 860 · 폭포수전 — 눌러서 물 틀기">
     <g class="fill" style="--d:${nd()}s">
-      <rect x="1440" y="80" width="880" height="460" rx="22" fill="url(#steel)" stroke="#8d8a86" stroke-width="4"/>
-      <rect x="1466" y="104" width="828" height="412" rx="14" fill="url(#bowl)"/>
-      <rect x="1466" y="104" width="828" height="38" rx="10" fill="#c9c7c3" opacity=".7"/>
-      <line x1="1480" y1="150" x2="2280" y2="150" stroke="#d8d6d2" stroke-width="5"/>
-      <g data-tip="고급 배수구 (스퀘어 커버)">
-        <rect x="1625" y="315" width="130" height="130" rx="18" fill="#7d7b77"/>
-        <rect x="1633" y="323" width="114" height="114" rx="14" fill="url(#steel)" stroke="#6f6d69" stroke-width="3"/>
-        <rect x="1660" y="350" width="60" height="60" rx="8" fill="none" stroke="#8e8c88" stroke-width="4"/>
-        <circle cx="1690" cy="380" r="8" fill="#6f6d69"/>
+      <rect x="1440" y="78" width="880" height="464" rx="26" fill="url(#rim)" stroke="#8d8a86" stroke-width="4"/>
+      <rect x="1462" y="100" width="836" height="420" rx="34" fill="url(#bowlWall)"/>
+      <rect x="1500" y="150" width="760" height="338" rx="26" fill="url(#bowlFloor)"/>
+      <path d="M1478 168H2282" stroke="#e9e8e5" stroke-width="7" stroke-linecap="round" opacity=".9"/>
+      <path d="M1478 176H2282" stroke="#9a9894" stroke-width="3" stroke-linecap="round" opacity=".6"/>
+      <rect x="1500" y="150" width="760" height="338" rx="26" fill="none" stroke="#b9b7b3" stroke-width="3"/>
+      <text x="${DX}" y="140" text-anchor="middle" font-size="22" fill="#8e8c88" font-weight="600" letter-spacing="1">Camforte</text>
+      <g data-tip="깜포르테 원형 배수구 커버">
+        <circle cx="${DX}" cy="${DY}" r="96" fill="#5f5d5a"/>
+        <circle cx="${DX}" cy="${DY}" r="90" fill="url(#drainCover)" stroke="#8a8884" stroke-width="2"/>
+        <ellipse cx="${DX - 22}" cy="${DY - 34}" rx="46" ry="20" fill="#fff" opacity=".45"/>
+        <circle cx="${DX}" cy="${DY}" r="78" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="2"/>
+        <text x="${DX}" y="${DY + 8}" text-anchor="middle" font-size="20" fill="#8a8884" font-weight="600" letter-spacing="1">Camforte</text>
       </g>
     </g>
     <g class="fill" style="--d:${nd()}s" data-tip="폭포수전">
-      <rect x="1840" y="20" width="80" height="58" rx="12" fill="url(#steel)" stroke="#7d7b77" stroke-width="4"/>
-      <rect x="1800" y="70" width="160" height="62" rx="8" fill="url(#steel)" stroke="#7d7b77" stroke-width="4"/>
-      <rect x="1810" y="120" width="140" height="10" rx="4" fill="#6f6d69"/>
-      <rect x="1935" y="30" width="70" height="22" rx="11" fill="#8d8a86"/>
+      <rect x="${DX - 40}" y="18" width="80" height="58" rx="12" fill="url(#steel)" stroke="#7d7b77" stroke-width="4"/>
+      <rect x="${DX - 80}" y="68" width="160" height="64" rx="8" fill="url(#steel)" stroke="#7d7b77" stroke-width="4"/>
+      <rect x="${DX - 70}" y="120" width="140" height="10" rx="4" fill="#6f6d69"/>
+      <rect x="${DX + 55}" y="28" width="70" height="22" rx="11" fill="#8d8a86"/>
     </g>
     <g class="water-g">
-      <path d="M1806 130H1954L1990 300H1770Z" fill="url(#waterG)"/>
+      <path d="M${DX - 74} 130H${DX + 74}L${DX + 100} ${DY - 30}H${DX - 100}Z" fill="url(#waterG)"/>
       <g class="stream">${flow}</g>
-      <ellipse class="ripple" cx="1880" cy="320" rx="150" ry="40"/>
-      <ellipse class="ripple" cx="1880" cy="320" rx="150" ry="40" style="animation-delay:-.6s"/>
-      <ellipse class="ripple" cx="1690" cy="380" rx="70" ry="70" style="animation-delay:-.3s"/>
+      <ellipse class="ripple" cx="${DX}" cy="${DY}" rx="150" ry="70"/>
+      <ellipse class="ripple" cx="${DX}" cy="${DY}" rx="150" ry="70" style="animation-delay:-.6s"/>
+      <ellipse class="ripple" cx="${DX}" cy="${DY}" rx="110" ry="110" style="animation-delay:-.3s"/>
     </g>
   </g>`;
 
@@ -987,17 +1003,84 @@ function planSVG() {
   return `<svg class="dw plan" viewBox="-960 -260 4260 2280" role="img" aria-label="주방 평면 배치">${s}</svg>`;
 }
 
+/* 냉장고 내용물 */
+const can = (x, y, c) => `<rect x="${x}" y="${y - 118}" width="62" height="118" rx="9" fill="${c}"/><rect x="${x + 4}" y="${y - 122}" width="54" height="10" rx="4" fill="#d8dadc"/><rect x="${x}" y="${y - 80}" width="62" height="26" fill="#fff" opacity=".35"/>`;
+const soju = (x, y) => `<rect x="${x + 20}" y="${y - 215}" width="24" height="70" rx="6" fill="#3f9a5c" opacity=".9"/><rect x="${x + 18}" y="${y - 226}" width="28" height="16" rx="3" fill="#2e6f43"/><rect x="${x}" y="${y - 155}" width="64" height="155" rx="14" fill="#4aa86a" opacity=".85"/><rect x="${x}" y="${y - 110}" width="64" height="42" fill="#f4f7f2"/><rect x="${x + 10}" y="${y - 145}" width="8" height="120" rx="4" fill="#fff" opacity=".4"/>`;
+const ion = (x, y) => `<rect x="${x + 16}" y="${y - 205}" width="40" height="26" rx="6" fill="#1f5fbf"/><rect x="${x}" y="${y - 182}" width="72" height="182" rx="16" fill="#eef5fb"/><rect x="${x}" y="${y - 130}" width="72" height="60" fill="#2f74d0"/><rect x="${x + 10}" y="${y - 114}" width="52" height="10" rx="5" fill="#fff" opacity=".8"/>`;
+const banchan = (x, y, food, w = 150) => `<rect x="${x}" y="${y - 92}" width="${w}" height="92" rx="12" fill="#f4f6f7" stroke="#cfd6db" stroke-width="3"/><rect x="${x + 8}" y="${y - 70}" width="${w - 16}" height="60" rx="8" fill="${food}"/><rect x="${x - 4}" y="${y - 100}" width="${w + 8}" height="18" rx="6" fill="#9fb4c2"/>`;
+const meat = (x, y, w = 190, h = 70) => `<rect x="${x}" y="${y - h}" width="${w}" height="${h}" rx="10" fill="#b8473f"/>
+  <path d="M${x + 20} ${y - h + 20}q${w / 4} 14 ${w / 2} 0t${w / 2 - 40} 6M${x + 26} ${y - 22}q${w / 3} -12 ${w - 60} 4" stroke="#f3d6cf" stroke-width="7" fill="none" stroke-linecap="round"/>
+  <rect x="${x}" y="${y - h}" width="${w}" height="${h}" rx="10" fill="#fff" opacity=".32"/><rect x="${x + w - 64}" y="${y - h + 10}" width="50" height="22" rx="4" fill="#fff" opacity=".9"/>`;
+const kimchiTong = (x, y, w = 330, h = 190) => `<rect x="${x}" y="${y - h}" width="${w}" height="${h}" rx="16" fill="#f6f2ec" stroke="#cfc6ba" stroke-width="3"/>
+  <rect x="${x + 12}" y="${y - h + 40}" width="${w - 24}" height="${h - 54}" rx="10" fill="#c43b2a"/>
+  ${[0, 1, 2, 3].map(k => `<path d="M${x + 30 + k * (w - 60) / 3} ${y - h + 52}q18 40 0 ${h - 80}" stroke="#f1d39b" stroke-width="12" fill="none" stroke-linecap="round" opacity=".85"/>`).join('')}
+  <rect x="${x + 12}" y="${y - h + 40}" width="${w - 24}" height="${h - 54}" rx="10" fill="#fff" opacity=".18"/>
+  <rect x="${x - 6}" y="${y - h - 6}" width="${w + 12}" height="34" rx="10" fill="#7a8f74"/>`;
+
+function fridgeInside(x, y, w, h, kind, top) {
+  const g = 14, ix = x + g, iw = w - g * 2;
+  const fy = y + g, fh = top - g * 1.5;               // 상단 칸
+  const by = y + top + g / 2, bh = h - top - g * 1.5; // 하단 칸
+  let s = `<rect x="${ix}" y="${fy}" width="${iw}" height="${fh}" rx="6" fill="#fbfcfd"/>
+    <rect x="${ix}" y="${fy}" width="${iw}" height="90" fill="#fff8e1" opacity=".9" filter="url(#soft)"/>`;
+  const shelf = yy => `<rect x="${ix}" y="${yy}" width="${iw}" height="12" fill="#dfe8ee" stroke="#c4d1da" stroke-width="2"/>`;
+  if (kind === 'fridge') {
+    const s1 = fy + fh * 0.3, s2 = fy + fh * 0.6, s3 = fy + fh * 0.86;
+    s += shelf(s1) + shelf(s2) + shelf(s3);
+    // 반찬통
+    s += banchan(ix + 30, s1, '#6f9a4a') + banchan(ix + 200, s1, '#c0392b') + banchan(ix + 370, s1, '#8b5a2b') + banchan(ix + 540, s1, '#e8c15a', 140) + banchan(ix + 700, s1, '#9bbf5a', 130);
+    // 맥주 + 소주
+    s += [0, 1, 2, 3, 4].map(k => can(ix + 30 + k * 70, s2, k % 2 ? '#d9a93a' : '#c9ccd0')).join('');
+    s += [0, 1, 2].map(k => soju(ix + 420 + k * 80, s2)).join('');
+    s += can(ix + 680, s2, '#d9a93a') + can(ix + 750, s2, '#d9a93a');
+    // 이온음료
+    s += [0, 1, 2, 3].map(k => ion(ix + 40 + k * 88, s3)).join('');
+    s += banchan(ix + 420, s3, '#f0e2c0', 170) + banchan(ix + 610, s3, '#d1744a', 160);
+    // 야채칸
+    s += `<rect x="${ix + 10}" y="${s3 + 24}" width="${iw - 20}" height="${fy + fh - s3 - 30}" rx="8" fill="#eaf3e6" stroke="#c6d7bf" stroke-width="3"/>
+      <circle cx="${ix + 120}" cy="${s3 + 70}" r="34" fill="#7cb342"/><circle cx="${ix + 200}" cy="${s3 + 75}" r="30" fill="#ef6c00"/><rect x="${ix + 260}" y="${s3 + 50}" width="160" height="40" rx="20" fill="#9ccc65"/>`;
+    // 냉동실: 얼린 고기
+    s += `<rect x="${ix}" y="${by}" width="${iw}" height="${bh}" rx="6" fill="#e3eef5"/>`;
+    const d1 = by + bh * 0.48;
+    s += `<rect x="${ix + 10}" y="${d1}" width="${iw - 20}" height="10" fill="#c7d8e3"/>`;
+    s += meat(ix + 30, d1 - 6) + meat(ix + 240, d1 - 6, 210, 80) + meat(ix + 470, d1 - 6, 170) + meat(ix + 660, d1 - 6, 190, 60);
+    s += meat(ix + 40, d1 - 86, 230, 60) + meat(ix + 300, d1 - 92, 200, 66) + meat(ix + 530, d1 - 72, 240, 56);
+    s += meat(ix + 30, by + bh - 20, 260, 90) + meat(ix + 320, by + bh - 20, 200, 80) + meat(ix + 550, by + bh - 20, 260, 86);
+    s += meat(ix + 80, by + bh - 110, 220, 70) + meat(ix + 380, by + bh - 106, 260, 66);
+    s += `<rect x="${ix}" y="${by}" width="${iw}" height="${bh}" rx="6" fill="#ffffff" opacity=".12"/>`;
+    s += `<text class="lbl-s" x="${x + w / 2}" y="${by + 50}" style="fill:#5c7a8a">냉동실</text>`;
+  } else {
+    const s1 = fy + fh * 0.5;
+    s += shelf(s1);
+    s += kimchiTong(ix + 30, s1 - 6) + kimchiTong(ix + 390, s1 - 6, 310);
+    s += kimchiTong(ix + 30, fy + fh - 10, 330, 200) + kimchiTong(ix + 390, fy + fh - 10, 310, 200);
+    s += `<rect x="${ix}" y="${by}" width="${iw}" height="${bh}" rx="6" fill="#f3f6f8"/>`;
+    const d1 = by + bh * 0.5;
+    s += `<rect x="${ix + 10}" y="${d1}" width="${iw - 20}" height="10" fill="#d4dde3"/>`;
+    s += kimchiTong(ix + 40, d1 - 8, 300, 220) + kimchiTong(ix + 380, d1 - 8, 300, 220);
+    s += kimchiTong(ix + 40, by + bh - 20, 300, 230) + kimchiTong(ix + 380, by + bh - 20, 300, 230);
+  }
+  return s;
+}
+
 function fridge(x, y, w, h, label, kind, delay) {
   const g = 10, half = w / 2;
   const top = kind === 'kimchi' ? h * 0.5 : h * 0.55;
-  return `<g class="slide-in mod" style="--d:${delay}s" data-tip="${label}">
-    <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="8" fill="#e9e6e1" stroke="var(--ink)" stroke-width="5"/>
-    <rect x="${x + g}" y="${y + g}" width="${half - g * 1.5}" height="${top - g * 1.5}" rx="4" fill="#f4f2ee"/>
-    <rect x="${x + half + g / 2}" y="${y + g}" width="${half - g * 1.5}" height="${top - g * 1.5}" rx="4" fill="#f4f2ee"/>
-    <rect x="${x + g}" y="${y + top + g / 2}" width="${half - g * 1.5}" height="${h - top - g * 1.5}" rx="4" fill="#f4f2ee"/>
-    <rect x="${x + half + g / 2}" y="${y + top + g / 2}" width="${half - g * 1.5}" height="${h - top - g * 1.5}" rx="4" fill="#f4f2ee"/>
-    <text class="lbl-s" x="${x + w / 2}" y="${y + top * 0.45}">${label.split(' · ')[0]}</text>
-    <text class="dim-t" x="${x + w / 2}" y="${y + top * 0.45 + 56}">${w}</text>
+  const door = (dx, dy, dw, dh, side) => `<g class="fdoor" data-h="${side}">
+      <rect x="${dx}" y="${dy}" width="${dw}" height="${dh}" rx="5" fill="#f1efeb" stroke="#c9c5bf" stroke-width="3"/>
+      <rect x="${side === 'l' ? dx + dw - 16 : dx + 8}" y="${dy + 40}" width="8" height="${Math.min(260, dh - 80)}" rx="4" fill="#d6d2cc"/></g>`;
+  const name = label.split(' · ')[0];
+  return `<g class="slide-in" style="--d:${delay}s">
+    <g class="frg hot" data-act="toggle" data-tip="${esc(label)} — 눌러서 열기">
+      <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="8" fill="#e9e6e1" stroke="var(--ink)" stroke-width="5"/>
+      <g class="fin">${fridgeInside(x, y, w, h, kind, top)}</g>
+      ${door(x + g, y + g, half - g * 1.5, top - g * 1.5, 'l')}
+      ${door(x + half + g / 2, y + g, half - g * 1.5, top - g * 1.5, 'r')}
+      ${door(x + g, y + top + g / 2, half - g * 1.5, h - top - g * 1.5, 'l')}
+      ${door(x + half + g / 2, y + top + g / 2, half - g * 1.5, h - top - g * 1.5, 'r')}
+      <g class="fname"><text class="lbl-s" x="${x + w / 2}" y="${y + top * 0.45}">${name}</text>
+      <text class="dim-t" x="${x + w / 2}" y="${y + top * 0.45 + 56}">${w}</text></g>
+    </g>
   </g>`;
 }
 
@@ -1102,7 +1185,7 @@ const SPECS = {
 const HINTS = {
   sink: '도어 · 서랍 · 대리석 벽체(조명) · 싱크볼(물) · 로봇청소기를 눌러보세요',
   plan: '인덕션(불) · 싱크볼(물) · 로봇청소기를 눌러보세요',
-  builtin: 'ㄱ자 팬트리장 · 브릿지장 · 도어 · 밥솥 슬라이드장을 눌러보세요',
+  builtin: 'ㄱ자 팬트리장 · 냉장고 · 김치냉장고 · 브릿지장 · 밥솥 슬라이드장을 눌러보세요',
   render: '',
 };
 
