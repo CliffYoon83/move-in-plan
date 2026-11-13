@@ -363,6 +363,8 @@ details.lines tr.neg td:last-child{color:#b4553f}
 .dw .dish.open .dw-door{transform:scaleX(1);transition-duration:1.2s}
 .dw .dw-gap{opacity:0;transition:opacity .4s}
 .dw .dish.open .dw-gap{opacity:1}
+.dw .dw-rack{transform:translateX(270px);transition:transform .45s cubic-bezier(.45,0,.55,1)}
+.dw .dish.open .dw-rack{transform:none;transition:transform .9s cubic-bezier(.22,.8,.3,1) .85s}
 .dw .dw-steam{fill:none;stroke:#b7c6d1;stroke-width:14;stroke-linecap:round;opacity:0}
 .dw .dish.open .dw-steam{animation:dwSteam 2.4s ease-out 1s infinite}
 @keyframes dwSteam{0%{opacity:0;transform:translateX(0)}30%{opacity:.7}100%{opacity:0;transform:translateX(-120px)}}

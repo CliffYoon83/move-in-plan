@@ -1169,20 +1169,40 @@ function planSVG() {
     <path d="M2590 190 l-40 -26 M2590 190 l-46 -2 M2590 190 l-30 -38" stroke="#9a9a96" stroke-width="5" stroke-linecap="round"/>
   </g>`;
 
-  // 식기세척기 (페닌슐라 하부 빌트인, 앞면은 싱크 쪽) — 위에서 본 모습, 클릭하면 문이 살짝 열림
+  // 식기세척기 (페닌슐라 끝쪽 하부 빌트인, 앞면은 싱크 쪽) — 위에서 본 모습
+  // 클릭: 문이 살짝 열리고 → 하단 바스켓이 문 위로 미끄러져 나오며 그릇이 보임
+  const Y0 = 950, H0 = 600, DXL = 1980;
   let steam = '';
-  for (let k = 0; k < 3; k++) steam += `<path class="dw-steam" d="M${2190 - k * 50} ${760 + k * 160}q-40 40 0 80t0 80" style="animation-delay:${-k * 0.5}s"/>`;
+  for (let k = 0; k < 3; k++) steam += `<path class="dw-steam" d="M${DXL + 30 - k * 40} ${Y0 + 90 + k * 170}q-40 40 0 80t0 80" style="animation-delay:${-k * 0.5}s"/>`;
+  // 바스켓 내용물: 세워 꽂은 접시(위에서 보면 얇은 막대가 차곡차곡) + 볼 + 컵 + 수저통
+  const RX = DXL + 14, RW = 232, RY = Y0 + 22, RH = H0 - 44;
+  let rack = `<rect x="${RX}" y="${RY}" width="${RW}" height="${RH}" rx="14" fill="#dfe6ea" stroke="#7f8c95" stroke-width="5"/>`;
+  for (let y = RY + 30; y < RY + RH; y += 34) rack += `<line x1="${RX + 6}" y1="${y}" x2="${RX + RW - 6}" y2="${y}" stroke="#a9b5bd" stroke-width="2"/>`;
+  for (let x = RX + 30; x < RX + RW; x += 40) rack += `<line x1="${x}" y1="${RY + 6}" x2="${x}" y2="${RY + RH - 6}" stroke="#a9b5bd" stroke-width="2"/>`;
+  // 접시 2줄 (큰 접시 / 앞접시)
+  for (let i = 0; i < 11; i++) {
+    const x = RX + 14 + i * 19;
+    rack += `<rect x="${x}" y="${RY + 16}" width="11" height="196" rx="5" fill="${i % 2 ? '#f3f1ec' : '#ffffff'}" stroke="#b9b5ae" stroke-width="2"/>`;
+    rack += `<rect x="${x}" y="${RY + 228}" width="11" height="128" rx="5" fill="${i % 3 === 1 ? '#e7eef4' : '#fbfaf7'}" stroke="#b3b8bc" stroke-width="2"/>`;
+  }
+  // 볼 2개 + 머그 + 수저통
+  const bowl = (cx, cy, r) => `<circle cx="${cx}" cy="${cy}" r="${r}" fill="#fbfaf7" stroke="#b9b5ae" stroke-width="3"/><circle cx="${cx}" cy="${cy}" r="${r * 0.62}" fill="#ecebe6"/><circle cx="${cx}" cy="${cy}" r="${r * 0.3}" fill="#f7f6f2" stroke="#d2d0ca" stroke-width="2"/>`;
+  rack += bowl(RX + 58, RY + 420, 46) + bowl(RX + 58, RY + 510, 40);
+  rack += `<circle cx="${RX + 168}" cy="${RY + 404}" r="30" fill="#5d7f99" stroke="#46647b" stroke-width="3"/><circle cx="${RX + 168}" cy="${RY + 404}" r="20" fill="#3d566a"/><rect x="${RX + 194}" y="${RY + 396}" width="22" height="16" rx="6" fill="none" stroke="#46647b" stroke-width="5"/>`;
+  rack += `<rect x="${RX + 128}" y="${RY + 452}" width="88" height="86" rx="10" fill="#cfd7dc" stroke="#7f8c95" stroke-width="3"/>`;
+  for (let k = 0; k < 6; k++) rack += `<circle cx="${RX + 146 + (k % 3) * 26}" cy="${RY + 476 + Math.floor(k / 3) * 38}" r="8" fill="#9aa3a9"/>`;
+  s += `<defs><clipPath id="dwClip"><rect x="${DXL - 10}" y="${Y0 - 10}" width="${2240 - DXL + 10}" height="${H0 + 20}"/></clipPath></defs>`;
   s += `<g class="dish hot" data-act="toggle" data-tip="식기세척기 · LG DEE6EWE — 눌러서 열기">
     <g class="fill" style="--d:1.35s">
-      <rect x="2250" y="640" width="580" height="600" rx="14" fill="#f4f4f2" fill-opacity=".55" stroke="#55504b" stroke-width="5" stroke-dasharray="20 12"/>
-      <rect class="dw-gap" x="2240" y="648" width="26" height="584" rx="6" fill="#262626"/>
+      <rect x="2250" y="${Y0}" width="580" height="${H0}" rx="14" fill="#f4f4f2" fill-opacity=".55" stroke="#55504b" stroke-width="5" stroke-dasharray="20 12"/>
+      <text class="lbl" x="2540" y="${Y0 + 285}">식기세척기</text><text class="lbl-s" x="2540" y="${Y0 + 365}">설치 예정</text>
+      <rect class="dw-gap" x="2240" y="${Y0 + 8}" width="26" height="${H0 - 16}" rx="6" fill="#262626"/>
       <g class="dw-door">
-        <rect x="1980" y="640" width="260" height="600" rx="10" fill="url(#steel)" stroke="#8d8a86" stroke-width="4"/>
-        <rect x="2030" y="690" width="170" height="500" rx="16" fill="#cfcfcb" opacity=".55"/>
-        <rect x="2110" y="860" width="70" height="120" rx="10" fill="#9a9894" stroke="#7d7b77" stroke-width="3"/>
-        <rect x="1980" y="640" width="26" height="600" rx="8" fill="#fbfbfa" stroke="#c4c4c0" stroke-width="3"/>
-        <rect x="1986" y="700" width="10" height="480" rx="5" fill="#3a3a3a"/>
+        <rect x="${DXL}" y="${Y0}" width="${2240 - DXL}" height="${H0}" rx="10" fill="url(#steel)" stroke="#8d8a86" stroke-width="4"/>
+        <rect x="${DXL}" y="${Y0}" width="26" height="${H0}" rx="8" fill="#fbfbfa" stroke="#c4c4c0" stroke-width="3"/>
+        <rect x="${DXL + 6}" y="${Y0 + 60}" width="10" height="${H0 - 120}" rx="5" fill="#3a3a3a"/>
       </g>
+      <g clip-path="url(#dwClip)"><g class="dw-rack">${rack}</g></g>
       ${steam}
     </g>
   </g>`;
@@ -1190,7 +1210,7 @@ function planSVG() {
   // 라벨 (가려지지 않게 상판 밖 아래쪽으로)
   s += `<text class="lbl fill" x="560" y="690" style="--d:1.4s">인덕션 3구</text>`;
   s += `<text class="lbl fill" x="1880" y="690" style="--d:1.45s">싱크볼</text><text class="lbl-s fill" x="1880" y="760" style="--d:1.47s">백조 깜포르테 860</text>`;
-  s += `<text class="lbl fill" x="2600" y="1370" style="--d:1.5s">식기세척기</text><text class="lbl-s fill" x="2600" y="1450" style="--d:1.52s">설치 예정</text>`;
+  s += ``;
   s += `<text class="lbl-s fill" x="2735" y="560" style="--d:1.5s">로봇청소기</text>`;
   D = 1.5;
   s += dimH(0, 2960, -130, '2960');
