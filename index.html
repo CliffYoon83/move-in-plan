@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>새집 준비 · 이사 플래너</title>
+<meta name="description" content="인테리어 · 전자제품 · 가구 예산과 진행 상황을 한눈에.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect rx='14' width='64' height='64' fill='%23b08d68'/><path d='M14 34 32 18l18 16v14H14z' fill='%23fff8ee'/><rect x='27' y='36' width='10' height='12' fill='%23b08d68'/></svg>">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="bg-orbs" aria-hidden="true"><span></span><span></span><span></span></div>
+
+<header class="topbar">
+  <a class="brand" href="#top">
+    <svg viewBox="0 0 64 64" width="30" height="30" aria-hidden="true"><rect rx="16" width="64" height="64" fill="var(--accent)"/><path class="brand-roof" d="M14 34 32 18l18 16v14H14z" fill="var(--paper)"/><rect x="27" y="36" width="10" height="12" fill="var(--accent)"/></svg>
+    <span>새집 준비</span>
+  </a>
+  <nav class="nav" id="nav">
+    <a href="#top" data-sec="top">대시보드</a>
+    <a href="#interior" data-sec="interior">인테리어</a>
+    <a href="#electronics" data-sec="electronics">전자제품</a>
+    <a href="#furniture" data-sec="furniture">가구</a>
+  </nav>
+  <div class="top-actions">
+    <button class="icon-btn" id="themeBtn" title="테마 전환" aria-label="테마 전환">
+      <svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9z" fill="currentColor"/></svg>
+    </button>
+    <button class="icon-btn" id="menuBtn" title="데이터 관리" aria-label="데이터 관리">
+      <svg viewBox="0 0 24 24" width="18" height="18"><circle cx="5" cy="12" r="2" fill="currentColor"/><circle cx="12" cy="12" r="2" fill="currentColor"/><circle cx="19" cy="12" r="2" fill="currentColor"/></svg>
+    </button>
+    <div class="menu" id="menu" hidden>
+      <button data-act="export">데이터 내보내기 (JSON)</button>
+      <button data-act="import">데이터 가져오기</button>
+      <button data-act="reset" class="danger">초기 데이터로 되돌리기</button>
+      <p class="menu-note">변경 내용은 이 브라우저에 자동 저장돼요. 다른 기기로 옮길 땐 내보내기/가져오기를 쓰세요.</p>
+    </div>
+    <input type="file" id="importFile" accept="application/json" hidden>
+  </div>
+</header>
+
+<main id="top">
+  <!-- ============ HERO / DASHBOARD ============ -->
+  <section class="hero">
+    <div class="hero-left reveal">
+      <p class="eyebrow">MOVE-IN PLANNER</p>
+      <h1>새집으로 가는 길,<br><em>한눈에</em> 정리해요.</h1>
+      <div class="total-block">
+        <span class="total-label">확정 예산 합계</span>
+        <div class="total-num"><span class="won">₩</span><span id="totalNum" data-count>0</span></div>
+        <div class="total-sub">
+          <span class="pill pill-consider">고려중 <b id="considerNum">₩0</b></span>
+          <span class="pill">모두 포함 시 <b id="allNum">₩0</b></span>
+        </div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-head"><span>구매·시공 완료</span><span id="doneLabel">0%</span></div>
+        <div class="progress"><div class="progress-bar" id="doneBar"></div></div>
+      </div>
+    </div>
+    <div class="hero-right reveal">
+      <div class="donut-wrap">
+        <svg class="donut" id="donut" viewBox="0 0 220 220" aria-label="분류별 비용 비중"></svg>
+        <div class="donut-center"><span id="donutCount">0</span><small>개 항목</small></div>
+      </div>
+      <div class="cat-cards" id="catCards"></div>
+    </div>
+  </section>
+
+  <!-- ============ INTERIOR ============ -->
+  <section class="section" id="interior" data-cat="interior">
+    <div class="sec-head reveal">
+      <div>
+        <p class="eyebrow">01 · INTERIOR</p>
+        <h2>인테리어</h2>
+      </div>
+      <div class="sec-sum"><span>소계</span><b data-sub="interior">₩0</b></div>
+    </div>
+
+    <div class="showcase reveal">
+      <div class="show-tabs" role="tablist">
+        <button class="on" data-view="sink" role="tab">싱크대</button>
+        <button data-view="plan" role="tab">평면 배치</button>
+        <button data-view="builtin" role="tab">싱크대 옆 붙박이장</button>
+        <button data-view="render" role="tab">예상 렌더링</button>
+        <span class="tab-ink" aria-hidden="true"></span>
+      </div>
+      <div class="show-body">
+        <div class="stage" id="stage"></div>
+        <aside class="materials">
+          <h3>마감재</h3>
+          <label class="swatch">
+            <input type="color" id="doorColor">
+            <span class="chip door-chip"></span>
+            <span><b>도어</b><small>영림 · 듄 선셋 스톤</small></span>
+          </label>
+          <label class="swatch">
+            <input type="color" id="topColor">
+            <span class="chip top-chip"></span>
+            <span><b>상판 · 벽체</b><small>한스톤 · 크레모사</small></span>
+          </label>
+          <p class="mat-note">색상 칩을 눌러 실제 샘플과 비슷하게 맞출 수 있어요. 화면 색은 참고용이에요.</p>
+          <dl class="spec" id="specList"></dl>
+        </aside>
+      </div>
+    </div>
+
+    <div class="toolbar reveal">
+      <div class="filters" data-filter-for="interior"></div>
+      <button class="add-btn" data-add="interior"><span>+</span> 항목 추가</button>
+    </div>
+    <div class="grid" data-list="interior"></div>
+  </section>
+
+  <!-- ============ ELECTRONICS ============ -->
+  <section class="section" id="electronics" data-cat="electronics">
+    <div class="sec-head reveal">
+      <div>
+        <p class="eyebrow">02 · ELECTRONICS</p>
+        <h2>전자제품</h2>
+      </div>
+      <div class="sec-sum"><span>소계</span><b data-sub="electronics">₩0</b></div>
+    </div>
+    <div class="toolbar reveal">
+      <div class="filters" data-filter-for="electronics"></div>
+      <button class="add-btn" data-add="electronics"><span>+</span> 항목 추가</button>
+    </div>
+    <div class="grid" data-list="electronics"></div>
+  </section>
+
+  <!-- ============ FURNITURE ============ -->
+  <section class="section" id="furniture" data-cat="furniture">
+    <div class="sec-head reveal">
+      <div>
+        <p class="eyebrow">03 · FURNITURE</p>
+        <h2>가구</h2>
+      </div>
+      <div class="sec-sum"><span>소계</span><b data-sub="furniture">₩0</b></div>
+    </div>
+    <div class="toolbar reveal">
+      <div class="filters" data-filter-for="furniture"></div>
+      <button class="add-btn" data-add="furniture"><span>+</span> 항목 추가</button>
+    </div>
+    <div class="grid" data-list="furniture"></div>
+  </section>
+
+  <footer class="foot">
+    <p>변경 사항은 이 브라우저에 저장됩니다 · 에누리 가격은 몇 시간마다 자동 갱신돼요.</p>
+  </footer>
+</main>
+
+<!-- ============ MODAL ============ -->
+<dialog class="modal" id="modal">
+  <form method="dialog" id="itemForm">
+    <header class="modal-head">
+      <h3 id="modalTitle">항목 추가</h3>
+      <button type="button" class="icon-btn" data-close aria-label="닫기">✕</button>
+    </header>
+    <div class="modal-body">
+      <div class="row2">
+        <label>이름<input name="name" required placeholder="예: 소파"></label>
+        <label>분류
+          <select name="cat">
+            <option value="interior">인테리어</option>
+            <option value="electronics">전자제품</option>
+            <option value="furniture">가구</option>
+          </select>
+        </label>
+      </div>
+      <label>모델명 · 사양<input name="model" placeholder="예: 4인용 패브릭 / 모델명"></label>
+      <div class="row2">
+        <label>금액 (원)<input name="price" inputmode="numeric" placeholder="미정이면 비워두기"></label>
+        <label>상태
+          <select name="status">
+            <option value="considering">고려중</option>
+            <option value="confirmed">확정</option>
+            <option value="done">구매·시공 완료</option>
+          </select>
+        </label>
+      </div>
+      <div class="row2">
+        <label>구매처<input name="store" placeholder="예: 패밀리넷"></label>
+        <label>링크<input name="link" type="url" placeholder="https://"></label>
+      </div>
+      <label>에누리 최저가 연동 <small class="hint">에누리 상품 페이지 주소나 번호를 넣으면 실시간 최저가가 금액으로 쓰여요</small>
+        <input name="enuri" placeholder="https://price.enuri.com/catalog/…">
+      </label>
+      <fieldset class="rows" data-rows="options">
+        <legend>옵션 (선택) <small class="hint">예: 3실 / 4실처럼 가격이 다른 선택지</small></legend>
+        <div class="rows-list"></div>
+        <button type="button" class="ghost-btn" data-addrow="options">+ 옵션 추가</button>
+      </fieldset>
+      <fieldset class="rows" data-rows="lines">
+        <legend>세부 견적 (선택) <small class="hint">입력하면 합계가 금액이 돼요</small></legend>
+        <div class="rows-list"></div>
+        <button type="button" class="ghost-btn" data-addrow="lines">+ 세부 항목 추가</button>
+      </fieldset>
+      <label>메모<textarea name="note" rows="3" placeholder="치수, 색상, 비교 후보 등"></textarea></label>
+    </div>
+    <footer class="modal-foot">
+      <button type="button" class="ghost-btn danger" id="deleteBtn">삭제</button>
+      <span class="spacer"></span>
+      <button type="button" class="ghost-btn" data-close>취소</button>
+      <button type="submit" class="primary-btn" value="save">저장</button>
+    </footer>
+  </form>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="tip" id="tip" role="tooltip"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
