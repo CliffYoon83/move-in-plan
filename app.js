@@ -1169,10 +1169,28 @@ function planSVG() {
     <path d="M2590 190 l-40 -26 M2590 190 l-46 -2 M2590 190 l-30 -38" stroke="#9a9a96" stroke-width="5" stroke-linecap="round"/>
   </g>`;
 
+  // 식기세척기 (페닌슐라 하부 빌트인, 앞면은 싱크 쪽) — 위에서 본 모습, 클릭하면 문이 살짝 열림
+  let steam = '';
+  for (let k = 0; k < 3; k++) steam += `<path class="dw-steam" d="M${2190 - k * 50} ${760 + k * 160}q-40 40 0 80t0 80" style="animation-delay:${-k * 0.5}s"/>`;
+  s += `<g class="dish hot" data-act="toggle" data-tip="식기세척기 · LG DEE6EWE — 눌러서 열기">
+    <g class="fill" style="--d:1.35s">
+      <rect x="2250" y="640" width="580" height="600" rx="14" fill="#f4f4f2" fill-opacity=".55" stroke="#55504b" stroke-width="5" stroke-dasharray="20 12"/>
+      <rect class="dw-gap" x="2240" y="648" width="26" height="584" rx="6" fill="#262626"/>
+      <g class="dw-door">
+        <rect x="1980" y="640" width="260" height="600" rx="10" fill="url(#steel)" stroke="#8d8a86" stroke-width="4"/>
+        <rect x="2030" y="690" width="170" height="500" rx="16" fill="#cfcfcb" opacity=".55"/>
+        <rect x="2110" y="860" width="70" height="120" rx="10" fill="#9a9894" stroke="#7d7b77" stroke-width="3"/>
+        <rect x="1980" y="640" width="26" height="600" rx="8" fill="#fbfbfa" stroke="#c4c4c0" stroke-width="3"/>
+        <rect x="1986" y="700" width="10" height="480" rx="5" fill="#3a3a3a"/>
+      </g>
+      ${steam}
+    </g>
+  </g>`;
+
   // 라벨 (가려지지 않게 상판 밖 아래쪽으로)
   s += `<text class="lbl fill" x="560" y="690" style="--d:1.4s">인덕션 3구</text>`;
   s += `<text class="lbl fill" x="1880" y="690" style="--d:1.45s">싱크볼</text><text class="lbl-s fill" x="1880" y="760" style="--d:1.47s">백조 깜포르테 860</text>`;
-  s += `<text class="lbl fill" x="2600" y="1070" style="--d:1.5s">식기세척기</text><text class="lbl fill" x="2600" y="1170" style="--d:1.52s">설치 예정</text>`;
+  s += `<text class="lbl fill" x="2600" y="1370" style="--d:1.5s">식기세척기</text><text class="lbl-s fill" x="2600" y="1450" style="--d:1.52s">설치 예정</text>`;
   s += `<text class="lbl-s fill" x="2735" y="560" style="--d:1.5s">로봇청소기</text>`;
   D = 1.5;
   s += dimH(0, 2960, -130, '2960');
@@ -1386,7 +1404,7 @@ const SPECS = {
 };
 const HINTS = {
   sink: '도어 · 서랍 · 레인지후드 · 대리석 벽체(조명) · 싱크볼(물) · 로봇청소기를 눌러보세요',
-  plan: '인덕션(불) · 싱크볼(물) · 로봇청소기를 눌러보세요',
+  plan: '인덕션(불) · 싱크볼(물) · 식기세척기 · 로봇청소기를 눌러보세요',
   builtin: 'ㄱ자 팬트리장 · 냉장고 · 김치냉장고 · 브릿지장 · 밥솥 슬라이드장을 눌러보세요',
   render: '',
 };

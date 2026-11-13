@@ -358,6 +358,14 @@ details.lines tr.neg td:last-child{color:#b4553f}
 .dw .ind-ui circle{fill:#6b6763;transition:fill .4s}
 .dw .ind.open .ind-ui circle{fill:#ff8a3d}
 @keyframes heat{50%{opacity:.6}}
+/* dishwasher (plan, top view) */
+.dw .dw-door{transform-box:fill-box;transform-origin:100% 50%;transform:scaleX(0);transition:transform .6s cubic-bezier(.45,0,.55,1)}
+.dw .dish.open .dw-door{transform:scaleX(1);transition-duration:1.2s}
+.dw .dw-gap{opacity:0;transition:opacity .4s}
+.dw .dish.open .dw-gap{opacity:1}
+.dw .dw-steam{fill:none;stroke:#b7c6d1;stroke-width:14;stroke-linecap:round;opacity:0}
+.dw .dish.open .dw-steam{animation:dwSteam 2.4s ease-out 1s infinite}
+@keyframes dwSteam{0%{opacity:0;transform:translateX(0)}30%{opacity:.7}100%{opacity:0;transform:translateX(-120px)}}
 /* robot */
 .dw .robot,.dw .robot-plan{transform-box:fill-box}
 .dw .robot.go{animation:robotOut 4s cubic-bezier(.45,0,.3,1)}
