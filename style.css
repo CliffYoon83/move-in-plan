@@ -2,7 +2,7 @@
   --bg:#f6f1ea; --paper:#fffaf3; --card:#fffdf9; --ink:#2b2622; --ink2:#6f655b; --line:#e7ddd0;
   --accent:#b08d68; --accent2:#8a6a4a; --soft:#efe6da;
   --c-interior:#b08d68; --c-electronics:#5c7a8a; --c-furniture:#8a9a6b; --c-etc:#9b7e93;
-  --consider:#c9893d; --done:#5b8a63; --confirmed:#3f5f7a;
+  --consider:#c9893d; --done:#5b8a63; --confirmed:#e0322b;
   --door:#dedcd7; --top:#ece5da;
   --shadow:0 1px 2px rgba(60,40,20,.05),0 8px 30px rgba(60,40,20,.07);
   --r:18px;
@@ -191,10 +191,8 @@ h2{font-size:clamp(26px,3.2vw,36px);margin:0;letter-spacing:-.03em;font-weight:8
 .status:hover{transform:scale(1.06)}
 .status:active{transform:scale(.94)}
 .st-considering{background:color-mix(in srgb,var(--consider) 16%,transparent);color:var(--consider)}
-.st-confirmed{background:color-mix(in srgb,var(--confirmed) 14%,transparent);color:var(--confirmed)}
+.st-confirmed{background:var(--confirmed);color:#fff;box-shadow:0 2px 8px color-mix(in srgb,var(--confirmed) 40%,transparent)}
 .st-done{background:color-mix(in srgb,var(--done) 16%,transparent);color:var(--done)}
-:root[data-theme="dark"] .st-confirmed{color:#8fb3d1}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .st-confirmed{color:#8fb3d1}}
 .price{font-size:24px;font-weight:800;letter-spacing:-.03em}
 .price.tbd{color:var(--ink2);font-size:18px;font-weight:700}
 .price small{font-size:13px;color:var(--ink2);font-weight:600;margin-left:4px}
