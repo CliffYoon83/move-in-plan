@@ -45,7 +45,7 @@ function defaults() {
   return {
     version: 4,
     flags: { etcSeeded: true },
-    colors: { door: '#bdbdb8', top: '#ece5da' },
+    colors: { door: '#dedcd7', top: '#ece5da' },
     items: [
       // ---------- 인테리어 ----------
       {
@@ -155,12 +155,12 @@ function fixStone(st) {
   }
   return changed;
 }
-const OLD_DOOR = '#cbbfae', NEW_DOOR = '#bdbdb8';
+const OLD_DOOR = '#cbbfae', NEW_DOOR = '#dedcd7';
 function fixDoorColor(st) {
   // 도어재 변경(포그 그레이) 시 한 번만 색상 교체 — 이후 사용자가 칩으로 고른 색은 유지
-  if (st.flags?.doorFinish === 'fog-gray') return false;
+  if (st.flags?.doorFinish === 'fog-gray-2') return false;
   st.colors = { ...(st.colors || {}), door: NEW_DOOR };
-  st.flags = { ...(st.flags || {}), doorFinish: 'fog-gray' };
+  st.flags = { ...(st.flags || {}), doorFinish: 'fog-gray-2' };
   return true;
 }
 function migrate4(st) {
@@ -190,7 +190,7 @@ function migrate3(st) {
 
 let state = store.get(LS_KEY);
 if (!state || !Array.isArray(state.items)) state = defaults();
-state.colors ||= { door: '#bdbdb8', top: '#ece5da' };
+state.colors ||= { door: '#dedcd7', top: '#ece5da' };
 migrate(state);
 if (fixStone(state) | fixDoorColor(state)) store.set(LS_KEY, state);
 let live = store.get(LS_LIVE) || {};
@@ -855,7 +855,7 @@ const DEFS = `<defs>
 
 let D = 0; // animation delay cursor
 const nd = (s = 0.06) => (D += s).toFixed(2);
-function box(x, y, w, h, cls = 'door', tip = '', tex = cls === 'door' ? 'grain' : cls === 'top' ? 'marble' : '') {
+function box(x, y, w, h, cls = 'door', tip = '', tex = cls === 'top' ? 'marble' : '') {
   const d = nd();
   const fd = (Number(d) + 0.45).toFixed(2);
   return `<g class="mod"${tip ? ` data-tip="${esc(tip)}"` : ''}>
@@ -1460,7 +1460,7 @@ $('#importFile').addEventListener('change', async e => {
   try {
     const j = JSON.parse(await f.text());
     if (!Array.isArray(j.items)) throw 0;
-    state = j; state.colors ||= { door: '#bdbdb8', top: '#ece5da' };
+    state = j; state.colors ||= { door: '#dedcd7', top: '#ece5da' };
     save(); applyColors(); renderAll(); toast('데이터를 불러왔어요');
   } catch { toast('올바른 JSON 파일이 아니에요'); }
   e.target.value = '';
