@@ -25,10 +25,19 @@ const STATUS_ORDER = ['considering', 'confirmed', 'done'];
 
 const uid = () => Math.random().toString(36).slice(2, 10);
 
+/* ---------------- product specs (사이즈 · 사진) ---------------- */
+const SPEC = {
+  fridge:     { code: 'RM70F64Q1A',     size: '912 × 1853 × 697 mm (W×H×D)', img: 'assets/products/fridge.jpg' },
+  kimchi:     { code: 'RK70F42M2A',     size: '799 × 1853 × 697 mm (W×H×D)', img: 'assets/products/kimchi.jpg' },
+  aircon:     { code: 'AN30CSU4P36SSY', size: '36평형 4실 (18+6+6+6평) · 실내기 1200×450×138 / 970×410×135 mm', img: 'assets/products/aircon.jpg' },
+  washer:     { code: 'WF80H21GDS',     size: '686 × 984 × 796 mm (W×H×D)', img: 'assets/products/washer.jpg' },
+  dishwasher: { code: 'DEE6EWE',        size: '598 × 815 × 567 mm (W×H×D)', img: 'assets/products/dishwasher.jpg' },
+};
+
 /* ---------------- default data ---------------- */
 function defaults() {
   return {
-    version: 1,
+    version: 2,
     colors: { door: '#cbbfae', top: '#ece5da' },
     items: [
       // ---------- 인테리어 ----------
@@ -36,7 +45,7 @@ function defaults() {
         id: uid(), cat: 'interior', name: '싱크대', status: 'confirmed',
         model: 'ㄱ자 2960 × 1570 · 도어 영림 듄 선셋 스톤 · 상판 한스톤 크레모사',
         store: '(주)한솔홈', link: '',
-        note: '최신 도면 기준. 비규격장, T5 간접조명.\n보조주방 상부장 없음 · 페닌슐라 하부 로봇청소기 150 띄움.',
+        note: '최신 도면 기준. 비규격장, T5 간접조명.\n보조주방 상부장 없음 · 키큰장 하부 로봇청소기 150 띄움.',
         lines: [
           { label: '싱크대', spec: '2960×1570 · 비규격장, T5 간접조명', amount: 2871000 },
           { label: '보조주방', spec: '1060×650 · 상부장 X', amount: 594000 },
@@ -44,7 +53,7 @@ function defaults() {
           { label: '상판 업그레이드', spec: '크레모사 · 2960/1570/1160', amount: 2530000 },
           { label: '대리석 벽체', spec: '크레모사 · 2560', amount: 1408000 },
           { label: '조명', spec: 'T5 · 라인조명 1EA', amount: 440000 },
-          { label: '싱크볼', spec: '깜뽀르테 860', amount: 715000 },
+          { label: '싱크볼', spec: '백조 깜포르테 860', amount: 715000 },
           { label: '견적 할인 (D.C)', spec: '전체 견적 기준', amount: -616000 },
         ],
       },
@@ -60,24 +69,26 @@ function defaults() {
         ],
       },
       { id: uid(), cat: 'interior', name: '거실 홈바장', status: 'considering', model: '견적 대기', store: '', link: '', note: '', price: null },
+      { id: uid(), cat: 'interior', name: '마루보수', status: 'considering', model: '견적 대기', store: '', link: '', note: '', price: null },
+      { id: uid(), cat: 'interior', name: '도배', status: 'considering', model: '견적 대기', store: '', link: '', note: '', price: null },
       { id: uid(), cat: 'interior', name: '중문', status: 'considering', model: '', store: '', link: '', note: '고려중', price: null },
       { id: uid(), cat: 'interior', name: '실링팬', status: 'considering', model: '', store: '', link: '', note: '고려중', price: null },
 
       // ---------- 전자제품 ----------
-      { id: uid(), cat: 'electronics', name: '냉장고', status: 'confirmed', model: '삼성 RM70F64Q1A · 키친핏 맥스 · 자동 각얼음', store: '삼성 패밀리넷', link: '', note: '', price: 2150000 },
-      { id: uid(), cat: 'electronics', name: '김치냉장고', status: 'confirmed', model: '삼성 RK70F42M2A · 키친핏 맥스 · 4도어', store: '삼성 패밀리넷', link: '', note: '', price: 1700000 },
+      { id: uid(), cat: 'electronics', name: '냉장고', status: 'confirmed', model: '삼성 RM70F64Q1A · 키친핏 맥스 · 자동 각얼음', store: '삼성 패밀리넷', link: '', note: '', price: 2150000, size: SPEC.fridge.size, img: SPEC.fridge.img },
+      { id: uid(), cat: 'electronics', name: '김치냉장고', status: 'confirmed', model: '삼성 RK70F42M2A · 키친핏 맥스 · 4도어', store: '삼성 패밀리넷', link: '', note: '', price: 1700000, size: SPEC.kimchi.size, img: SPEC.kimchi.img },
       {
         id: uid(), cat: 'electronics', name: '시스템에어컨', status: 'confirmed',
         model: '삼성 AN30CSU4P36SSY · 공청판넬 or AI판넬 옵션', store: '삼성 패밀리넷', link: '',
-        note: '3실 가격은 확인 후 입력하세요.',
+        note: '3실 가격은 확인 후 입력하세요.', size: SPEC.aircon.size, img: SPEC.aircon.img,
         options: [ { label: '4실', price: 5032000 }, { label: '3실', price: null } ], opt: 0,
       },
-      { id: uid(), cat: 'electronics', name: '세탁기', status: 'confirmed', model: '삼성 WF80H21GDS · 비스포크 AI 세탁기 21kg', store: '삼성 패밀리넷', link: '', note: '', price: 949000 },
+      { id: uid(), cat: 'electronics', name: '세탁기', status: 'confirmed', model: '삼성 WF80H21GDS · 비스포크 AI 세탁기 21kg', store: '삼성 패밀리넷', link: '', note: '', price: 949000, size: SPEC.washer.size, img: SPEC.washer.img },
       {
         id: uid(), cat: 'electronics', name: '식기세척기', status: 'confirmed',
         model: 'LG 디오스 오브제컬렉션 DEE6EWE · 14인용 빌트인', store: '에누리 최저가',
         link: 'https://price.enuri.com/catalog/131321549', enuri: '131321549',
-        note: '', price: 1560940,
+        note: '', price: 1560940, size: SPEC.dishwasher.size, img: SPEC.dishwasher.img,
       },
 
       // ---------- 가구 ----------
@@ -93,9 +104,32 @@ const store = {
   get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
 };
+
+/* ---------------- migration (기존 저장 데이터 업데이트) ---------------- */
+function migrate(st) {
+  if ((st.version || 1) >= 2) return;
+  for (const it of st.items) {
+    if (it.note) it.note = it.note.replace('페닌슐라 하부 로봇청소기', '키큰장 하부 로봇청소기');
+    (it.lines || []).forEach(l => { if (l.spec === '깜뽀르테 860') l.spec = '백조 깜포르테 860'; });
+    for (const k in SPEC) {
+      if ((it.model || '').includes(SPEC[k].code)) { it.size ||= SPEC[k].size; it.img ||= SPEC[k].img; }
+    }
+  }
+  const idx = st.items.findIndex(i => i.cat === 'interior' && i.name === '중문');
+  for (const name of ['도배', '마루보수']) {
+    if (!st.items.some(i => i.name === name)) {
+      const it = { id: uid(), cat: 'interior', name, status: 'considering', model: '견적 대기', store: '', link: '', note: '', price: null };
+      st.items.splice(idx >= 0 ? idx : st.items.length, 0, it);
+    }
+  }
+  st.version = 2;
+  store.set(LS_KEY, st);
+}
+
 let state = store.get(LS_KEY);
 if (!state || !Array.isArray(state.items)) state = defaults();
 state.colors ||= { door: '#cbbfae', top: '#ece5da' };
+migrate(state);
 let live = store.get(LS_LIVE) || {};
 const save = () => store.set(LS_KEY, state);
 
@@ -244,9 +278,11 @@ function cardHTML(it, i) {
     it.store ? `<span class="tag">${esc(it.store)}</span>` : '',
     it.link && !it.enuri ? `<a class="tag" href="${esc(it.link)}" target="_blank" rel="noopener">링크 ↗</a>` : '',
   ].join('');
-  return `<article class="card" data-id="${it.id}" style="--i:${i * 0.05}s;--cat-c:${CATS[it.cat].hex}">
+  const imgBadge = it.img ? `<button class="photo-badge" data-act="photo" title="제품 사진" aria-label="제품 사진 보기"><svg viewBox="0 0 24 24" width="13" height="13"><path d="M4 7h3l2-2h6l2 2h3v12H4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.5" fill="none" stroke="currentColor" stroke-width="2"/></svg></button>` : '';
+  const sizeHTML = it.size ? `<div class="size"><svg viewBox="0 0 24 24" width="13" height="13"><path d="M3 17 17 3l4 4L7 21z M7 13l2 2M10 10l2 2M13 7l2 2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>${esc(it.size)}</div>` : '';
+  return `<article class="card${it.img ? ' has-img' : ''}" data-id="${it.id}"${it.img ? ` data-img="${esc(it.img)}"` : ''} style="--i:${i * 0.05}s;--cat-c:${CATS[it.cat].hex}">
     <div class="card-top">
-      <div><h4>${esc(it.name)}</h4>${it.model ? `<div class="model">${esc(it.model)}</div>` : ''}</div>
+      <div><h4>${esc(it.name)}${imgBadge}</h4>${it.model ? `<div class="model">${esc(it.model)}</div>` : ''}${sizeHTML}</div>
       <button class="status st-${it.status}" data-act="status" title="눌러서 상태 변경">${STATUS[it.status]}</button>
     </div>
     ${opts}
@@ -366,6 +402,8 @@ function openModal(it, cat = 'interior') {
   form.link.value = v.link || '';
   form.enuri.value = v.enuri ? `https://price.enuri.com/catalog/${v.enuri}` : '';
   form.note.value = v.note || '';
+  form.size.value = v.size || '';
+  form.img.value = v.img || '';
   $('[data-rows="options"] .rows-list').innerHTML = (v.options || []).map(r => rowHTML('options', r)).join('');
   $('[data-rows="lines"] .rows-list').innerHTML = (v.lines || []).map(r => rowHTML('lines', r)).join('');
   $('#deleteBtn').style.visibility = it ? 'visible' : 'hidden';
@@ -409,6 +447,8 @@ form.addEventListener('submit', e => {
     link: form.link.value.trim(),
     enuri: enuriId(form.enuri.value),
     note: form.note.value.trim(),
+    size: form.size.value.trim() || undefined,
+    img: form.img.value.trim() || undefined,
     options: options.length ? options : undefined,
     lines: lines.length ? lines : undefined,
   };
@@ -447,6 +487,41 @@ function toast(msg, actionLabel, action) {
   clearTimeout(toastT);
   toastT = setTimeout(() => el.classList.remove('show'), action ? 5000 : 2400);
 }
+/* ---------------- product photo preview (hover) ---------------- */
+const preview = $('#preview');
+let previewFor = null;
+function showPreview(card) {
+  const it = state.items.find(i => i.id === card.dataset.id);
+  if (!it?.img) return;
+  previewFor = card;
+  const img = preview.querySelector('img');
+  if (img.getAttribute('src') !== it.img) img.src = it.img;
+  preview.querySelector('figcaption').innerHTML = `<b>${esc(it.name)}</b>${it.size ? `<span>${esc(it.size)}</span>` : ''}`;
+  const r = card.getBoundingClientRect();
+  const W = 240, H = 300;
+  let left = r.right + 14;
+  if (left + W > innerWidth - 8) left = r.left - W - 14;
+  if (left < 8) left = Math.max(8, Math.min(innerWidth - W - 8, r.left + r.width / 2 - W / 2));
+  let top = r.top + r.height / 2 - H / 2;
+  top = Math.max(70, Math.min(innerHeight - H - 8, top));
+  preview.style.left = left + 'px';
+  preview.style.top = top + 'px';
+  preview.classList.add('show');
+}
+function hidePreview() { previewFor = null; preview.classList.remove('show'); }
+document.addEventListener('pointerover', e => {
+  if (e.pointerType !== 'mouse') return;
+  const card = e.target.closest?.('.card.has-img');
+  if (card && card !== previewFor) showPreview(card);
+  else if (!card && previewFor) hidePreview();
+});
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-act="photo"]');
+  if (b) { e.stopPropagation(); const c = b.closest('.card'); previewFor === c ? hidePreview() : showPreview(c); }
+  else if (previewFor && !e.target.closest('.card.has-img')) hidePreview();
+}, true);
+addEventListener('scroll', () => previewFor && hidePreview(), { passive: true });
+
 const tip = $('#tip');
 document.addEventListener('pointermove', e => {
   const t = e.target.closest?.('[data-tip]');
@@ -520,7 +595,7 @@ $('#doorColor').addEventListener('input', e => { state.colors.door = e.target.va
 $('#topColor').addEventListener('input', e => { state.colors.top = e.target.value; applyColors(); save(); });
 
 /* ===========================================================
-   Kitchen drawings (SVG, mm 단위)
+   Kitchen drawings (SVG, mm 단위) — 클릭하면 열리고 켜지는 인터랙션
    =========================================================== */
 const DEFS = `<defs>
   <filter id="grain" x="0" y="0" width="100%" height="100%">
@@ -533,6 +608,22 @@ const DEFS = `<defs>
     <feColorMatrix values="0 0 0 0 .45  0 0 0 0 .4  0 0 0 0 .34  0 0 0 -0.9 0.5"/>
     <feComposite in2="SourceGraphic" operator="in"/>
   </filter>
+  <filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="14"/></filter>
+  <linearGradient id="wash" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#fff1cf" stop-opacity=".95"/>
+    <stop offset=".45" stop-color="#ffe9bd" stop-opacity=".35"/>
+    <stop offset="1" stop-color="#ffe9bd" stop-opacity="0"/>
+  </linearGradient>
+  <linearGradient id="steel" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#d9d8d5"/><stop offset=".5" stop-color="#a9a7a3"/><stop offset="1" stop-color="#cfcdc9"/>
+  </linearGradient>
+  <linearGradient id="bowl" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#8e8c88"/><stop offset="1" stop-color="#b9b7b3"/>
+  </linearGradient>
+  <radialGradient id="heat"><stop offset="0" stop-color="#ffb347"/><stop offset=".55" stop-color="#ff5a2a"/><stop offset="1" stop-color="#c81e0a" stop-opacity="0"/></radialGradient>
+  <linearGradient id="waterG" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#d7eefa" stop-opacity=".95"/><stop offset="1" stop-color="#a9d6ee" stop-opacity=".55"/>
+  </linearGradient>
 </defs>`;
 
 let D = 0; // animation delay cursor
@@ -561,111 +652,207 @@ function dimV(x, y1, y2, label) {
     <text class="dim-t" x="${x - 30}" y="${(y1 + y2) / 2}" transform="rotate(-90 ${x - 30} ${(y1 + y2) / 2})">${label}</text></g>`;
 }
 const ol = (dpath, delay) => `<path class="ol" pathLength="1" d="${dpath}" style="--d:${delay ?? nd()}s"/>`;
+const grip = (x, y, w) => `<rect class="dark" x="${x}" y="${y}" width="${w}" height="14"/>`;
+
+/* 캐비닛 내부 (문 뒤에 그려짐) */
+function inside(x, y, w, h, kind = 'shelf') {
+  let s = `<rect class="cab-in" x="${x}" y="${y}" width="${w}" height="${h}"/>`;
+  const sh = n => { for (let k = 1; k <= n; k++) { const yy = y + (h / (n + 1)) * k; s += `<rect class="shelf" x="${x + 8}" y="${yy}" width="${w - 16}" height="14"/>`; } };
+  if (kind === 'upper') {
+    sh(1);
+    const y1 = y + h / 2, y2 = y + h - 8;
+    for (let cx = x + 50; cx < x + w - 60; cx += 85) {
+      s += `<rect class="ware" x="${cx}" y="${y1 - 120}" width="60" height="120" rx="8"/>`;
+      s += `<rect class="ware2" x="${cx + 5}" y="${y2 - 70}" width="70" height="70" rx="30"/>`;
+    }
+  } else if (kind === 'sinkbase') {
+    s += `<path d="M${x + w - 120} ${y} v120 a60 60 0 0 1 -120 0 v-40" fill="none" stroke="#a8a6a2" stroke-width="22"/>`;
+    s += `<rect class="ware" x="${x + 60}" y="${y + h - 220}" width="90" height="200" rx="16"/>`;
+  } else if (kind === 'base') {
+    sh(1);
+    s += `<rect class="ware2" x="${x + 60}" y="${y + h / 2 - 150}" width="160" height="136" rx="16"/>`;
+    s += `<rect class="ware" x="${x + 260}" y="${y + h - 200}" width="180" height="190" rx="10"/>`;
+  } else if (kind === 'tall') {
+    sh(3);
+  }
+  return s;
+}
+
+/* 여닫이 도어: hinge = left | right | top(플랩) | slide(오른쪽으로 밀림) */
+function swing(x, y, w, h, hinge, tip, inner = '', extra = '') {
+  return `<g class="sw hot" data-act="toggle" data-hinge="${hinge}" data-tip="${esc(tip)} · 눌러서 열기">
+    <g class="inside">${inner || inside(x, y, w, h)}</g>
+    <g class="leaf">${box(x, y, w, h, 'door')}${extra}</g>
+  </g>`;
+}
 
 function sinkSVG() {
   D = 0;
-  const FL = 2300, CT = 1430, SLAB = 34, BT = CT + SLAB, TK = 2200, UB = 750, UT = 30;
+  const FL = 2300, CT = 1430, SLAB = 34, BT = CT + SLAB, TK = 2200, UB = 750, UT = 30, RB = FL - 150;
   let s = DEFS;
   s += solid(0, 0, 2960, FL, 'wall', 0);
   s += solid(-120, FL, 3200, 40, 'floor', 0);
-  // backsplash (대리석 벽체)
-  s += `<g class="mod" data-tip="대리석 벽체 · 한스톤 크레모사 (2560)">
+
+  // 대리석 벽체 + T5 조명 (클릭하면 조명 켜짐)
+  s += `<g class="bs hot" data-act="toggle" data-tip="대리석 벽체 · 크레모사 — 눌러서 T5 조명 켜기">
     <rect class="fill top" x="0" y="${UB}" width="2510" height="${CT - UB}" style="--d:.2s"/>
-    <rect class="fill" x="0" y="${UB}" width="2510" height="${CT - UB}" fill="#fff" filter="url(#marble)" style="--d:.2s"/></g>`;
-  // upper cabinets
+    <rect class="fill" x="0" y="${UB}" width="2510" height="${CT - UB}" fill="#fff" filter="url(#marble)" style="--d:.2s"/>
+    <rect class="wash" x="0" y="${UB}" width="2510" height="${CT - UB}" fill="url(#wash)"/>
+    <rect class="t5g" x="40" y="${UB - 10}" width="2440" height="60" fill="#ffe7b0" filter="url(#soft)"/>
+    <rect class="t5" x="50" y="${UB + 2}" width="2420" height="10" rx="5"/>
+  </g>`;
+
+  // 상부장
   D = 0.2;
   s += box(0, UT, 50, UB - UT, 'door', '필러 FA 50');
-  s += box(50, UT, 450, 390, 'door', '후드장 900');
-  s += box(500, UT, 450, 390, 'door', '후드장 900');
+  s += swing(50, UT, 450, 390, 'left', '후드장 900', inside(50, UT, 450, 390, 'upper'));
+  s += swing(500, UT, 450, 390, 'right', '후드장 900', inside(500, UT, 450, 390, 'upper'));
   s += `<g class="mod" data-tip="레인지후드">
     <path class="fill steel" d="M110 ${UT + 390}H890L850 ${UT + 560}H150Z" style="--d:${nd()}s"/>
     ${ol(`M110 ${UT + 390}H890L850 ${UT + 560}H150Z`)}
     <rect class="fill dark" x="170" y="${UT + 540}" width="660" height="20" style="--d:${nd(0)}s"/></g>`;
-  [950, 1340, 1730, 2120].forEach((x, i) => s += box(x, UT, 390, UB - UT, 'door', `상부장 780 (${i < 2 ? '좌' : '우'})`));
-  // T5 glow
-  s += `<rect class="glow" x="60" y="${UB + 2}" width="2440" height="16" style="--d:1.6s"/>`;
-  s += `<rect class="fill" x="60" y="${UB + 4}" width="2440" height="8" fill="#fff3d0" style="--d:1.6s" data-tip="T5 간접조명"/>`;
-  // tall unit right
-  s += box(2510, UT, 450, 1070, 'door', '키큰장 450 · EP 20');
-  s += box(2510, UT + 1070, 450, TK - UT - 1070, 'door', '키큰장 450 · EP 20');
-  // countertop
+  [[950, 'left'], [1340, 'right'], [1730, 'left'], [2120, 'right']].forEach(([x, hg], i) =>
+    s += swing(x, UT, 390, UB - UT, hg, `상부장 780 (${i < 2 ? '좌' : '우'})`, inside(x, UT, 390, UB - UT, 'upper')));
+
+  // 키큰장 (하부 150 띄움 → 로봇청소기)
+  s += swing(2510, UT, 450, 1070, 'right', '키큰장 450', inside(2510, UT, 450, 1070, 'tall'));
+  s += swing(2510, UT + 1070, 450, RB - UT - 1070, 'right', '키큰장 450', inside(2510, UT + 1070, 450, RB - UT - 1070, 'tall'), grip(2510, UT + 1070, 450));
+  s += `<rect class="fill" x="2510" y="${RB}" width="450" height="150" fill="color-mix(in srgb,var(--ink) 10%,transparent)" style="--d:1.2s"/>`;
+  s += `<g class="robot hot" data-act="robot" data-tip="로봇청소기 · 키큰장 하부 150 띄움 — 눌러보기">
+    <rect x="2575" y="${FL - 105}" width="320" height="95" rx="40" fill="#2f2c2a"/>
+    <rect x="2600" y="${FL - 118}" width="270" height="22" rx="11" fill="#55504b"/>
+    <circle cx="2850" cy="${FL - 60}" r="10" fill="#7fd6a0"/>
+  </g>`;
+
+  // 상판
   s += box(0, CT, 2510, SLAB, 'top', '상판 · 한스톤 크레모사');
-  // base cabinets
-  const base = [
-    [0, 50, 'filler', '필러 FA 50'],
-    [50, 200, 'pull', '양념 인출장'],
-    [250, 600, 'drawer', '서랍장 600 · 인덕션'],
-    [850, 560, 'door', '하부장 560'],
-    [1410, 475, 'door', '개수대 하부장 950'],
-    [1885, 475, 'door', '개수대 하부장 950'],
-    [2360, 150, 'filler', '필러 · EP'],
-  ];
-  for (const [x, w, t, tip] of base) {
-    if (t === 'drawer') {
-      s += box(x, BT, w, 240, 'door', tip) + box(x, BT + 240, w, 248, 'door', tip) + box(x, BT + 488, w, TK - BT - 488, 'door', tip);
-    } else s += box(x, BT, w, TK - BT, 'door', tip);
-  }
-  // grip channels (gola)
-  const gd = nd(0.1);
-  s += `<g class="fill" style="--d:${(Number(gd) + .5).toFixed(2)}s">
-    <rect class="dark" x="50" y="${BT}" width="2310" height="14"/>
-    <rect class="dark" x="250" y="${BT + 240}" width="600" height="12"/>
-    <rect class="dark" x="250" y="${BT + 488}" width="600" height="12"/>
-    <rect class="dark" x="2510" y="${UT + 1070}" width="450" height="12"/></g>`;
-  // toe kick
-  s += solid(0, TK, 2960, FL - TK, 'dark', '1.5');
-  // cooktop + sink + faucet
-  s += `<g class="mod" data-tip="인덕션"><rect class="fill dark" x="300" y="${CT - 12}" width="500" height="14" rx="4" style="--d:1.9s"/></g>`;
-  s += `<g class="mod" data-tip="싱크볼 · 깜뽀르테 860">
-    <rect class="fill steel" x="1580" y="${CT - 4}" width="600" height="8" style="--d:2s"/>
-    <path class="ol" pathLength="1" d="M1880 ${CT - 4}V${CT - 230}q0-40 40-40h70v40" style="--d:2s;stroke:#8d8a86;stroke-width:16"/>
-    <path class="ol" pathLength="1" d="M1880 ${CT - 120}h-60" style="--d:2.3s;stroke:#8d8a86;stroke-width:12"/></g>`;
-  // dimensions
+
+  // 하부장
+  s += box(0, BT, 50, TK - BT, 'door', '필러 FA 50');
+  s += swing(50, BT, 200, TK - BT, 'left', '양념 인출장', `<rect class="cab-in" x="50" y="${BT}" width="200" height="${TK - BT}"/>` +
+    [0, 1, 2].map(k => `<rect class="shelf" x="62" y="${BT + 180 + k * 200}" width="176" height="12"/><rect class="ware" x="80" y="${BT + 90 + k * 200}" width="40" height="90" rx="6"/><rect class="ware2" x="140" y="${BT + 110 + k * 200}" width="40" height="70" rx="6"/>`).join(''), grip(50, BT, 200));
+  // 서랍 3단 (아래 → 위 순서로 그려야 위 서랍이 앞으로 나올 때 겹침이 자연스러움)
+  const drw = (y, h, label, stuff) => `<g class="drw hot" data-act="toggle" data-tip="${label} · 눌러서 열기">
+      <g class="dbox"><rect x="262" y="${y}" width="576" height="150" fill="#d8cbb6"/><rect x="262" y="${y}" width="576" height="24" fill="#b9a98f"/>${stuff(y)}</g>
+      <g class="front">${box(250, y, 600, h, 'door')}${grip(250, y, 600)}</g>
+    </g>`;
+  s += drw(BT + 488, TK - BT - 488, '서랍 3단 (하)', y => `<ellipse cx="420" cy="${y + 95}" rx="120" ry="34" fill="#6d6a66"/><ellipse cx="680" cy="${y + 95}" rx="110" ry="30" fill="#8a8681"/>`);
+  s += drw(BT + 240, 248, '서랍 3단 (중)', y => `<rect x="320" y="${y + 50}" width="160" height="80" rx="10" fill="#efe9df"/><rect x="520" y="${y + 50}" width="240" height="80" rx="10" fill="#e3d9c9"/>`);
+  s += drw(BT, 240, '서랍 3단 (상) · 인덕션 하부', y => [0, 1, 2, 3, 4, 5].map(k => `<rect x="${310 + k * 85}" y="${y + 40}" width="${k % 2 ? 18 : 26}" height="100" rx="8" fill="${k % 2 ? '#9a9792' : '#c9c3b8'}"/>`).join(''));
+  s += swing(850, BT, 560, TK - BT, 'left', '하부장 560', inside(850, BT, 560, TK - BT, 'base'), grip(850, BT, 560));
+  s += swing(1410, BT, 475, TK - BT, 'left', '개수대 하부장 950', inside(1410, BT, 475, TK - BT, 'sinkbase'), grip(1410, BT, 475));
+  s += swing(1885, BT, 475, TK - BT, 'right', '개수대 하부장 950', inside(1885, BT, 475, TK - BT, 'sinkbase'), grip(1885, BT, 475));
+  s += box(2360, BT, 150, TK - BT, 'door', '필러 · EP');
+  s += solid(0, TK, 2510, FL - TK, 'dark', '1.5');
+
+  // 인덕션
+  s += `<g class="mod" data-tip="인덕션 3구"><rect class="fill dark" x="300" y="${CT - 12}" width="500" height="14" rx="4" style="--d:1.9s"/></g>`;
+  // 싱크볼 + 폭포수전 (클릭하면 물)
+  const SPX = 1880, SY = CT - 236;
+  let streams = '';
+  for (let k = 0; k < 7; k++) streams += `<line x1="${SPX - 66 + k * 22}" y1="${SY + 16}" x2="${SPX - 66 + k * 22}" y2="${CT}" style="animation-delay:${-k * 0.13}s"/>`;
+  s += `<g class="sink hot" data-act="toggle" data-tip="백조 깜포르테 860 · 폭포수전 — 눌러서 물 틀기">
+    <rect class="fill" x="1560" y="${CT - 6}" width="640" height="10" fill="url(#steel)" style="--d:2s"/>
+    <g class="fill" style="--d:2.1s">
+      <rect x="${SPX - 22}" y="${CT - 300}" width="44" height="300" rx="6" fill="url(#steel)" stroke="#8d8a86" stroke-width="3"/>
+      <rect x="${SPX - 90}" y="${SY}" width="180" height="18" rx="4" fill="url(#steel)" stroke="#8d8a86" stroke-width="3"/>
+      <rect x="${SPX + 22}" y="${CT - 260}" width="60" height="12" rx="6" fill="#8d8a86"/>
+    </g>
+    <g class="water-g">
+      <rect x="${SPX - 76}" y="${SY + 16}" width="152" height="${CT - SY - 16}" fill="url(#waterG)" rx="6"/>
+      <g class="stream">${streams}</g>
+    </g>
+  </g>`;
+
+  // 치수
   D = 1.9;
   s += dimH(0, 950, -50, '900+FA50') + dimH(950, 1730, -50, '780') + dimH(1730, 2510, -50, '780') + dimH(2510, 2960, -50, '450');
   s += dimH(0, 2960, -170, '2960');
-  s += dimH(0, 250, FL + 110, 'FA·200', false) + dimH(250, 850, FL + 110, '600', false) + dimH(850, 1410, FL + 110, '560', false) + dimH(1410, 2360, FL + 110, '950', false);
+  s += dimH(0, 250, FL + 110, 'FA·200', false) + dimH(250, 850, FL + 110, '600', false) + dimH(850, 1410, FL + 110, '560', false) + dimH(1410, 2360, FL + 110, '950', false) + dimH(2510, 2960, FL + 110, '450', false);
   s += dimV(-60, CT, FL, '870');
-  return `<svg class="dw" viewBox="-160 -260 3260 2800" role="img" aria-label="싱크대 정면도">${s}</svg>`;
+  s += `<g class="fill" style="--d:2.4s"><path class="dim" d="M3020 ${RB}V${FL}"/><text class="dim-t" x="3050" y="${RB + 60}" text-anchor="start" style="text-anchor:start">150</text></g>`;
+  return `<svg class="dw" viewBox="-160 -260 3300 2800" role="img" aria-label="싱크대 정면도">${s}</svg>`;
 }
 
 function planSVG() {
   D = 0;
   let s = DEFS;
-  // walls
-  s += `<g class="fill" style="--d:0s"><rect class="wall" x="-1560" y="-80" width="4600" height="1800" rx="30"/></g>`;
-  s += ol('M-1500 -40H3000V1650', '0.1');
-  s += ol('M-1500 -40V900', '0.15');
+  // 벽 (보조주방은 ㄱ자로 꺾인 니치 안쪽 벽에 배치)
+  s += `<g class="fill" style="--d:0s"><rect class="wall" x="-900" y="-90" width="4100" height="2050" rx="30"/></g>`;
+  s += ol('M3000 -40H-40V680H-740V1900', '0.1');
+  s += ol('M3000 -40V1700', '0.15');
+  s += `<g class="fill" style="--d:.6s" data-tip="창문"><rect x="-756" y="1080" width="32" height="360" fill="#e9f3f8" stroke="var(--ink)" stroke-width="4"/><line x1="-740" y1="1080" x2="-740" y2="1440" stroke="var(--ink)" stroke-width="3"/></g>`;
   D = 0.3;
-  // 보조주방
-  s += box(-1460, 0, 1060, 650, 'top', '보조주방 1060 × 650 · 상부장 X');
-  s += `<text class="lbl fill" x="-930" y="340" style="--d:1.2s">보조주방</text><text class="lbl-s fill" x="-930" y="400" style="--d:1.25s">1060 × 650</text>`;
-  // main run
+  // 보조주방 (니치 안쪽 벽, 주방과 ㄱ자)
+  s += box(-700, 720, 650, 1060, 'top', '보조주방 1060 × 650 · 상부장 X');
+  s += `<text class="lbl fill" x="-375" y="1230" style="--d:1.2s">보조주방</text><text class="lbl-s fill" x="-375" y="1310" style="--d:1.25s">1060 × 650</text>`;
+  // 주방 상판 + 키큰장 + 페닌슐라
   s += box(0, 0, 2510, 600, 'top', '주방 상판 2960 · 크레모사');
-  s += box(2510, 0, 450, 600, 'door', '키큰장 450');
-  // peninsula
-  s += box(2240, 600, 720, 970, 'top', '페닌슐라 · 하부 로봇청소기 150 띄움');
-  // cooktop / sink
-  s += `<g class="mod" data-tip="인덕션"><rect class="fill dark" x="300" y="90" width="500" height="420" rx="24" style="--d:${nd()}s"/>
-    <circle class="fill" cx="430" cy="220" r="90" fill="none" stroke="#777" stroke-width="8" style="--d:${nd(0)}s"/>
-    <circle class="fill" cx="660" cy="380" r="80" fill="none" stroke="#777" stroke-width="8" style="--d:${nd(0)}s"/></g>`;
-  s += `<g class="mod" data-tip="싱크볼 깜뽀르테 860"><rect class="fill steel" x="1450" y="110" width="860" height="400" rx="30" style="--d:${nd()}s"/>
-    <circle class="fill dark" cx="1700" cy="310" r="34" style="--d:${nd(0)}s"/></g>`;
-  s += `<text class="lbl fill" x="550" y="590" style="--d:1.4s" dy="-30" font-size="40">인덕션</text>`;
-  s += `<text class="lbl fill" x="1880" y="590" style="--d:1.45s" dy="-30" font-size="40">싱크볼</text>`;
-  s += `<text class="lbl fill" x="2600" y="1100" style="--d:1.5s">페닌슐라</text><text class="lbl-s fill" x="2600" y="1160" style="--d:1.55s">로봇청소기 150 띄움</text>`;
-  s += `<text class="lbl-s fill" x="2735" y="330" style="--d:1.5s" fill="#fff">키큰장</text>`;
+  s += box(2510, 0, 450, 600, 'door', '키큰장 450 · 하부 로봇청소기');
+  s += box(2240, 600, 720, 970, 'top', '페닌슐라');
+
+  // 인덕션 3구 (클릭하면 불)
+  const burner = (cx, cy, r) => `<circle class="burn-glow" cx="${cx}" cy="${cy}" r="${r + 10}" fill="url(#heat)"/>
+    <circle class="burn" cx="${cx}" cy="${cy}" r="${r}"/><circle class="burn" cx="${cx}" cy="${cy}" r="${r * 0.6}"/>`;
+  s += `<g class="ind hot" data-act="toggle" data-tip="인덕션 3구 — 눌러서 켜기">
+    <rect class="fill dark" x="290" y="70" width="540" height="460" rx="26" style="--d:${nd()}s"/>
+    <g class="fill" style="--d:${nd(0)}s">${burner(430, 220, 110)}${burner(700, 200, 80)}${burner(590, 410, 90)}
+      <g class="ind-ui"><circle cx="350" cy="490" r="9"/><circle cx="380" cy="490" r="9"/><circle cx="410" cy="490" r="9"/></g></g>
+  </g>`;
+
+  // 백조 깜포르테 860 + 고급 배수구 + 폭포수전 (클릭하면 물)
+  let flow = '';
+  for (let k = 0; k < 8; k++) flow += `<line x1="${1810 + k * 20}" y1="132" x2="${1800 + k * 23}" y2="300" style="animation-delay:${-k * 0.11}s"/>`;
+  s += `<g class="sink hot" data-act="toggle" data-tip="백조 깜포르테 860 · 폭포수전 — 눌러서 물 틀기">
+    <g class="fill" style="--d:${nd()}s">
+      <rect x="1440" y="80" width="880" height="460" rx="22" fill="url(#steel)" stroke="#8d8a86" stroke-width="4"/>
+      <rect x="1466" y="104" width="828" height="412" rx="14" fill="url(#bowl)"/>
+      <rect x="1466" y="104" width="828" height="38" rx="10" fill="#c9c7c3" opacity=".7"/>
+      <line x1="1480" y1="150" x2="2280" y2="150" stroke="#d8d6d2" stroke-width="5"/>
+      <g data-tip="고급 배수구 (스퀘어 커버)">
+        <rect x="1625" y="315" width="130" height="130" rx="18" fill="#7d7b77"/>
+        <rect x="1633" y="323" width="114" height="114" rx="14" fill="url(#steel)" stroke="#6f6d69" stroke-width="3"/>
+        <rect x="1660" y="350" width="60" height="60" rx="8" fill="none" stroke="#8e8c88" stroke-width="4"/>
+        <circle cx="1690" cy="380" r="8" fill="#6f6d69"/>
+      </g>
+    </g>
+    <g class="fill" style="--d:${nd()}s" data-tip="폭포수전">
+      <rect x="1840" y="20" width="80" height="58" rx="12" fill="url(#steel)" stroke="#7d7b77" stroke-width="4"/>
+      <rect x="1800" y="70" width="160" height="62" rx="8" fill="url(#steel)" stroke="#7d7b77" stroke-width="4"/>
+      <rect x="1810" y="120" width="140" height="10" rx="4" fill="#6f6d69"/>
+      <rect x="1935" y="30" width="70" height="22" rx="11" fill="#8d8a86"/>
+    </g>
+    <g class="water-g">
+      <path d="M1806 130H1954L1990 300H1770Z" fill="url(#waterG)"/>
+      <g class="stream">${flow}</g>
+      <ellipse class="ripple" cx="1880" cy="320" rx="150" ry="40"/>
+      <ellipse class="ripple" cx="1880" cy="320" rx="150" ry="40" style="animation-delay:-.6s"/>
+      <ellipse class="ripple" cx="1690" cy="380" rx="70" ry="70" style="animation-delay:-.3s"/>
+    </g>
+  </g>`;
+
+  // 로봇청소기 (키큰장 하부)
+  s += `<g class="robot-plan hot" data-act="robot" data-tip="로봇청소기 · 키큰장 하부 150 띄움 — 눌러보기">
+    <circle cx="2735" cy="310" r="165" fill="#2f2c2a" fill-opacity=".85" stroke="#2f2c2a" stroke-width="4" stroke-dasharray="18 12"/>
+    <circle cx="2735" cy="250" r="34" fill="#55504b"/><circle cx="2800" cy="380" r="12" fill="#7fd6a0"/>
+  </g>`;
+
+  // 라벨 (가려지지 않게 상판 밖 아래쪽으로)
+  s += `<text class="lbl fill" x="560" y="690" style="--d:1.4s">인덕션 3구</text>`;
+  s += `<text class="lbl fill" x="1880" y="690" style="--d:1.45s">싱크볼</text><text class="lbl-s fill" x="1880" y="760" style="--d:1.47s">백조 깜포르테 860</text>`;
+  s += `<text class="lbl fill" x="2600" y="1120" style="--d:1.5s">페닌슐라</text>`;
+  s += `<text class="lbl-s fill" x="2735" y="560" style="--d:1.5s">로봇청소기</text>`;
   D = 1.5;
   s += dimH(0, 2960, -130, '2960');
-  s += dimH(-1460, -400, -130, '1060');
   s += `<g class="fill" style="--d:1.7s"><path class="dim" d="M3080 0V1570M3062 0h36M3062 1570h36"/><text class="dim-t" x="3130" y="785" transform="rotate(90 3130 785)">1570</text></g>`;
   s += dimH(2240, 2960, 1680, '720', false);
-  return `<svg class="dw plan" viewBox="-1620 -260 4900 2080" role="img" aria-label="주방 평면 배치">${s}</svg>`;
+  s += dimV(-820, 720, 1780, '1060');
+  s += dimH(-700, -50, 1850, '650', false);
+  return `<svg class="dw plan" viewBox="-960 -260 4260 2280" role="img" aria-label="주방 평면 배치">${s}</svg>`;
 }
 
 function fridge(x, y, w, h, label, kind, delay) {
-  const g = 10;
-  const half = w / 2;
+  const g = 10, half = w / 2;
   const top = kind === 'kimchi' ? h * 0.5 : h * 0.55;
   return `<g class="slide-in mod" style="--d:${delay}s" data-tip="${label}">
     <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="8" fill="#e9e6e1" stroke="var(--ink)" stroke-width="5"/>
@@ -674,64 +861,113 @@ function fridge(x, y, w, h, label, kind, delay) {
     <rect x="${x + g}" y="${y + top + g / 2}" width="${half - g * 1.5}" height="${h - top - g * 1.5}" rx="4" fill="#f4f2ee"/>
     <rect x="${x + half + g / 2}" y="${y + top + g / 2}" width="${half - g * 1.5}" height="${h - top - g * 1.5}" rx="4" fill="#f4f2ee"/>
     <text class="lbl-s" x="${x + w / 2}" y="${y + top * 0.45}">${label.split(' · ')[0]}</text>
+    <text class="dim-t" x="${x + w / 2}" y="${y + top * 0.45 + 56}">${w}</text>
   </g>`;
+}
+
+function pantry(x0, y0, x1, y1) {
+  // 내부 ㄱ자 팬트리: 상단 가로 선반 + 오른쪽 세로 선반열, 왼쪽 아래는 키 큰 수납 공간
+  const W = x1 - x0, split = x0 + 560, band = y0 + 640;
+  let s = `<rect x="${x0}" y="${y0}" width="${W}" height="${y1 - y0}" fill="#e7e0d5"/>`;
+  s += `<rect x="${x0}" y="${y0}" width="${W}" height="${y1 - y0}" fill="#5a4f45" opacity=".12"/>`;
+  const shelf = (a, b, y) => `<rect class="shelf" x="${a}" y="${y}" width="${b - a}" height="18"/>`;
+  [y0 + 300, band].forEach(y => s += shelf(x0 + 10, x1 - 10, y));
+  [band + 330, band + 660, band + 990, band + 1320].forEach(y => y < y1 - 60 && (s += shelf(split + 10, x1 - 10, y)));
+  s += `<rect x="${split}" y="${band}" width="18" height="${y1 - band}" fill="#b9ad9c"/>`;
+  // 물건들
+  const jar = (x, y, h, c) => `<rect x="${x}" y="${y - h}" width="70" height="${h}" rx="10" fill="${c}" opacity=".9"/><rect x="${x + 6}" y="${y - h - 16}" width="58" height="18" rx="5" fill="#6b5e52"/>`;
+  const boxy = (x, y, w, h, c) => `<rect x="${x}" y="${y - h}" width="${w}" height="${h}" rx="6" fill="${c}"/>`;
+  s += jar(x0 + 60, y0 + 300, 150, '#f3eadb') + jar(x0 + 150, y0 + 300, 120, '#e8d7b9') + jar(x0 + 240, y0 + 300, 170, '#f1e4cc') + boxy(x0 + 420, y0 + 300, 200, 160, '#c8b79d') + boxy(x0 + 650, y0 + 300, 220, 120, '#a99a85');
+  s += boxy(x0 + 50, band, 260, 190, '#d5c4a8') + jar(x0 + 360, band, 160, '#f3eadb') + jar(x0 + 450, band, 140, '#e8d7b9') + boxy(x0 + 620, band, 250, 220, '#b8a78d');
+  s += boxy(split + 50, band + 330, 300, 160, '#cbb99c') + jar(split + 70, band + 660, 160, '#f1e4cc') + jar(split + 170, band + 660, 130, '#efe2c9') + jar(split + 270, band + 660, 150, '#e8d7b9');
+  s += boxy(split + 60, band + 990, 280, 200, '#a99a85') + boxy(split + 40, band + 1320, 320, 150, '#d5c4a8');
+  // 왼쪽 아래 키 큰 공간: 청소기
+  s += `<rect x="${x0 + 200}" y="${band + 260}" width="40" height="${y1 - band - 360}" rx="12" fill="#77706a"/><rect x="${x0 + 150}" y="${y1 - 140}" width="150" height="70" rx="16" fill="#5c5650"/><rect x="${x0 + 175}" y="${band + 200}" width="90" height="90" rx="14" fill="#8a8580"/>`;
+  // H5 조명 (세로 + 선반 하부)
+  s += `<g class="h5">
+    <rect x="${x0 + 6}" y="${y0 + 20}" width="12" height="${y1 - y0 - 40}" rx="6" fill="#fff3cf"/>
+    <rect x="${x1 - 18}" y="${y0 + 20}" width="12" height="${y1 - y0 - 40}" rx="6" fill="#fff3cf"/>
+    <rect x="${x0}" y="${y0}" width="70" height="${y1 - y0}" fill="#ffe7b0" filter="url(#soft)" opacity=".8"/>
+    <rect x="${x1 - 70}" y="${y0}" width="70" height="${y1 - y0}" fill="#ffe7b0" filter="url(#soft)" opacity=".8"/>
+    ${[y0 + 318, band + 18].map(y => `<rect x="${x0 + 30}" y="${y}" width="${W - 60}" height="40" fill="#ffefc4" filter="url(#soft)" opacity=".7"/>`).join('')}
+    <text class="lbl-s" x="${x0 + W / 2}" y="${y0 + 120}" style="fill:#8a6a3a">H5 조명</text>
+  </g>`;
+  return s;
 }
 
 function builtinSVG() {
   D = 0;
-  const FL = 2300, TK = 2200, UT = 30;
+  const FL = 2300, TK = 2200, UT = 30, NT = 860, NB = 1460; // 니치(슬라이드장) 상하단
   let s = DEFS;
   s += solid(-200, 0, 3420, FL, 'wall', 0);
   s += solid(-200, FL, 3620, 40, 'floor', 0);
   D = 0.15;
-  // 태우기 165 (side)
   s += box(-165, UT, 145, TK - UT, 'door', '태우기 165');
   s += box(-20, UT, 40, TK - UT, 'door', 'EP 20');
-  // tall 980 (2 doors) with peek animation
-  s += box(20, UT, 480, TK - UT, 'door', '키큰장 980 · 내부 ㄱ자 시스템장');
-  s += `<g class="open-door" style="--d:3.2s">${box(500, UT, 480, TK - UT, 'door', '키큰장 980 · 내부 ㄱ자 시스템장')}</g>`;
-  // bridge cabinets
-  s += box(980, UT, 915, 400, 'door', '브릿지장 915');
-  s += box(1895, UT, 805, 400, 'door', '브릿지장 805');
-  // opening back
+  // 키큰장 980 — 내부 ㄱ자 팬트리 (클릭하면 문이 오른쪽으로 밀림)
+  s += `<g class="sw hot" data-act="toggle" data-hinge="slide" data-tip="내부 ㄱ자 팬트리장 · 눌러서 열기">
+    <g class="inside">${pantry(20, UT, 980, TK)}</g>
+    <g class="leaf">${box(20, UT, 480, TK - UT, 'door')}${box(500, UT, 480, TK - UT, 'door')}
+      <text class="lbl" x="500" y="1150">내부 ㄱ자 팬트리장</text></g>
+  </g>`;
+  // 브릿지장 (플랩 도어)
+  s += swing(980, UT, 915, 400, 'top', '브릿지장 915', inside(980, UT, 915, 400, 'upper'));
+  s += swing(1895, UT, 805, 400, 'top', '브릿지장 805', inside(1895, UT, 805, 400, 'upper'));
+  // 냉장고 자리
   s += `<rect class="fill" x="980" y="${UT + 400}" width="1720" height="${FL - UT - 400}" fill="color-mix(in srgb,var(--ink) 6%,transparent)" style="--d:.9s"/>`;
   s += ol(`M980 ${UT + 400}V${FL}M2700 ${UT + 400}V${FL}`, '0.9');
-  // EP between
   s += box(2700, UT, 20, TK - UT, 'door', 'EP 20');
-  // tall 450 with niche
-  s += box(2720, UT, 450, 950, 'door', '키큰장 450');
-  s += `<g class="mod" data-tip="오픈 니치"><rect class="fill dark" x="2720" y="${UT + 950}" width="450" height="420" style="--d:${nd()}s" opacity=".85"/>
-    <rect class="fill" x="2740" y="${UT + 1180}" width="410" height="14" fill="var(--door)" style="--d:${nd(0)}s"/>${ol(`M2720 ${UT + 950}h450v420h-450z`)}</g>`;
-  s += box(2720, UT + 1370, 450, TK - UT - 1370, 'door', '키큰장 450');
+  // 키큰장 450: 상부 도어 / 슬라이드장(밥솥) / 하부 도어
+  s += swing(2720, UT, 450, NT - UT, 'right', '키큰장 450 (상)', inside(2720, UT, 450, NT - UT, 'tall'));
+  s += `<g class="mod"><rect class="fill cab-in" x="2720" y="${NT}" width="450" height="${NB - NT}" style="--d:${nd()}s"/>
+    <rect class="fill" x="2735" y="${NT + 6}" width="420" height="40" fill="#ffe7b0" filter="url(#soft)" style="--d:${nd(0)}s"/>
+    ${ol(`M2720 ${NT}h450v${NB - NT}h-450z`)}</g>`;
+  s += `<g class="tray hot" data-act="toggle" data-tip="밥솥 슬라이드장 · 눌러서 꺼내기">
+    <g class="steam"><path d="M2900 ${NT + 230}q-30 -40 0 -80t0 -80"/><path d="M2950 ${NT + 220}q-30 -40 0 -80t0 -80"/><path d="M3000 ${NT + 230}q-30 -40 0 -80t0 -80"/></g>
+    <g class="pull">
+      <rect x="2735" y="${NB - 60}" width="420" height="24" rx="4" fill="#b9ad9c" stroke="var(--ink)" stroke-width="4"/>
+      <rect x="2800" y="${NB - 330}" width="290" height="270" rx="60" fill="#f4f2ee" stroke="#5a5550" stroke-width="5"/>
+      <rect x="2800" y="${NB - 330}" width="290" height="90" rx="45" fill="#e2ded8" stroke="#5a5550" stroke-width="5"/>
+      <rect x="2900" y="${NB - 200}" width="90" height="46" rx="8" fill="#2f2c2a"/>
+      <rect x="2915" y="${NB - 190}" width="60" height="12" rx="3" fill="#7fd6a0"/>
+      <rect x="3040" y="${NB - 300}" width="30" height="20" rx="6" fill="#8d8a86"/>
+    </g>
+  </g>`;
+  s += swing(2720, NB, 450, TK - NB, 'right', '키큰장 450 (하)', inside(2720, NB, 450, TK - NB, 'tall'));
   s += box(3170, UT, 50, TK - UT, 'door', 'FA 50');
-  // toe kick
   s += solid(-165, TK, 1145, FL - TK, 'dark', '1.3') + solid(2700, TK, 520, FL - TK, 'dark', '1.3');
-  // fridges
-  s += fridge(1135, 470, 700, 1830, '냉장고 · 삼성 RM70F64Q1A 키친핏 맥스', 'fridge', 1.7);
-  s += fridge(1850, 470, 700, 1830, '김치냉장고 · 삼성 RK70F42M2A 키친핏 맥스', 'kimchi', 1.95);
+  // 냉장고 912 + 김치냉장고 799 = 1711 (자리 1720)
+  s += fridge(984, 447, 912, 1853, '냉장고 · 삼성 RM70F64Q1A 키친핏 맥스 912×1853×697', 'fridge', 1.7);
+  s += fridge(1900, 447, 799, 1853, '김치냉장고 · 삼성 RK70F42M2A 키친핏 맥스 799×1853×697', 'kimchi', 1.95);
   D = 2.1;
   s += dimH(20, 980, -50, '980') + dimH(980, 1895, -50, '915') + dimH(1895, 2700, -50, '805') + dimH(2720, 3170, -50, '450');
   s += dimH(0, 3220, -170, '3220');
   s += dimH(-165, 20, FL + 110, '165', false);
-  s += `<text class="lbl fill" x="500" y="1150" style="--d:2.4s">내부 ㄱ자 시스템장</text>`;
-  return `<svg class="dw" viewBox="-300 -260 3640 2800" role="img" aria-label="냉장고장 정면도">${s}</svg>`;
+  s += dimV(3290, NT, NB, `${NB - NT}`);
+  return `<svg class="dw" viewBox="-300 -260 3700 2800" role="img" aria-label="냉장고장 정면도">${s}</svg>`;
 }
 
 const SPECS = {
   sink: [
     ['규격', 'ㄱ자 2960 × 1570'], ['도어', '영림 듄 선셋 스톤'], ['상판', '한스톤 크레모사'],
-    ['벽체', '크레모사 2560'], ['조명', 'T5 간접 + 라인조명'], ['싱크볼', '깜뽀르테 860'],
-    ['보조주방', '1060 × 650'], ['타일', '300×600 덧방'],
+    ['벽체', '크레모사 2560'], ['조명', 'T5 간접 + 라인조명'], ['싱크볼', '백조 깜포르테 860'],
+    ['수전', '폭포수전'], ['보조주방', '1060 × 650'], ['타일', '300×600 덧방'], ['로봇청소기', '키큰장 하부 150'],
   ],
   plan: [
-    ['주방', '2960 (D 600)'], ['페닌슐라', '1570 × 720'], ['보조주방', '1060 × 650'],
-    ['상판 길이', '2960 / 1570 / 1160'], ['하부', '로봇청소기 150 띄움'],
+    ['주방', '2960 (D 600)'], ['페닌슐라', '1570 × 720'], ['보조주방', '1060 × 650 (ㄱ자)'],
+    ['인덕션', '3구'], ['싱크볼', '백조 깜포르테 860'], ['상판 길이', '2960 / 1570 / 1160'], ['로봇청소기', '키큰장 하부'],
   ],
   builtin: [
-    ['규격', '3220 × 855'], ['구성', '980 · 915/805 · 450'], ['내부', 'ㄱ자 시스템장'],
-    ['냉장고', 'RM70F64Q1A'], ['김치냉장고', 'RK70F42M2A'], ['도어', '영림 듄 선셋 스톤'], ['철거', '기존 냉장고장'],
+    ['규격', '3220 × 855'], ['구성', '980 · 915/805 · 450'], ['내부', 'ㄱ자 팬트리장'], ['조명', 'H5 조명'],
+    ['슬라이드장', '밥솥 수납'], ['냉장고', 'RM70F64Q1A (912)'], ['김치냉장고', 'RK70F42M2A (799)'], ['도어', '영림 듄 선셋 스톤'],
   ],
   render: [['안내', '이전 시안 렌더링'], ['기준', '최신 도면 우선'], ['상판', '크레모사로 변경'], ['도어', '듄 선셋 스톤으로 변경']],
+};
+const HINTS = {
+  sink: '도어 · 서랍 · 대리석 벽체(조명) · 싱크볼(물) · 로봇청소기를 눌러보세요',
+  plan: '인덕션(불) · 싱크볼(물) · 로봇청소기를 눌러보세요',
+  builtin: 'ㄱ자 팬트리장 · 브릿지장 · 도어 · 밥솥 슬라이드장을 눌러보세요',
+  render: '',
 };
 
 function showView(v) {
@@ -739,12 +975,18 @@ function showView(v) {
   if (v === 'render') {
     stage.innerHTML = `<div><img src="assets/kitchen-render.jpg" alt="싱크대 예상 렌더링" loading="lazy"><p class="cap">이전 시안 렌더링 · 구조 참고용 (도면이 최신 기준, 마감재는 변경됨)</p></div>`;
   } else {
-    stage.innerHTML = { sink: sinkSVG, plan: planSVG, builtin: builtinSVG }[v]();
+    stage.innerHTML = { sink: sinkSVG, plan: planSVG, builtin: builtinSVG }[v]() + `<p class="hint-chip"><span>👆</span>${HINTS[v]}</p>`;
   }
   $('#specList').innerHTML = SPECS[v].map(([k, val]) => `<dt>${k}</dt><dd>${val}</dd>`).join('');
   $$('.show-tabs button').forEach(b => b.classList.toggle('on', b.dataset.view === v));
   moveInk();
 }
+$('#stage').addEventListener('click', e => {
+  const t = e.target.closest('[data-act]');
+  if (!t || !t.closest('svg')) return;
+  if (t.dataset.act === 'toggle') t.classList.toggle('open');
+  else if (t.dataset.act === 'robot') { t.classList.remove('go'); void t.getBoundingClientRect(); t.classList.add('go'); }
+});
 function moveInk() {
   const on = $('.show-tabs button.on'), ink = $('.tab-ink');
   if (!on) return;
