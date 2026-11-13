@@ -53,5 +53,20 @@ for (const id of watch) {
     } catch (e) { console.warn(`[${id}] ${src.slice(0, 40)}… failed: ${e.message}`); }
   }
   if (!done) console.warn(`[${id}] price not found from any source`);
+
+  // 최근 일별 최저가 추이 (에누리 차트 API) → 마지막 8개(7일 + 현재)만 저장
+  const chartUrl = `https://price.enuri.com/api/product/catalog/lowest-price-chart?catalogNo=${id}&delivery=N&showType=1M`;
+  for (const src of [chartUrl, `https://api.allorigins.win/raw?url=${encodeURIComponent(chartUrl)}`, `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(chartUrl)}`]) {
+    try {
+      const { status, html } = await get(src);
+      const pts = (JSON.parse(html)?.data?.chartProps?.data || []).filter(d => d && d.y).map(d => [String(d.x).replace(/[()]/g, ''), Number(d.y)]);
+      console.log(`[${id}] chart ${src.slice(0, 40)}… status=${status} points=${pts.length}`);
+      if (pts.length) {
+        out.items[id] = { ...(out.items[id] || prev.items[id] || {}), chart: pts.slice(-8) };
+        if (!done) { out.items[id].price = pts.at(-1)[1]; out.items[id].updatedAt = out.updatedAt; }
+        break;
+      }
+    } catch (e) { console.warn(`[${id}] chart ${src.slice(0, 40)}… failed: ${e.message}`); }
+  }
 }
 await writeFile('data/prices.json', JSON.stringify(out, null, 2) + '\n');
