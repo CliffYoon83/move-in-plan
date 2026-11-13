@@ -7,7 +7,7 @@
 <meta name="description" content="인테리어 · 전자제품 · 가구 예산과 진행 상황을 한눈에.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect rx='14' width='64' height='64' fill='%23b08d68'/><path d='M14 34 32 18l18 16v14H14z' fill='%23fff8ee'/><rect x='27' y='36' width='10' height='12' fill='%23b08d68'/></svg>">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=6">
 </head>
 <body>
 <div class="bg-orbs" aria-hidden="true"><span></span><span></span><span></span></div>
@@ -22,6 +22,7 @@
     <a href="#interior" data-sec="interior">인테리어</a>
     <a href="#electronics" data-sec="electronics">전자제품</a>
     <a href="#furniture" data-sec="furniture">가구</a>
+    <a href="#etc" data-sec="etc">기타</a>
   </nav>
   <div class="top-actions">
     <button class="auth-btn" id="authBtn" hidden></button>
@@ -146,6 +147,22 @@
     <div class="grid" data-list="furniture"></div>
   </section>
 
+  <!-- ============ ETC ============ -->
+  <section class="section" id="etc" data-cat="etc">
+    <div class="sec-head reveal">
+      <div>
+        <p class="eyebrow">04 · ETC</p>
+        <h2>기타</h2>
+      </div>
+      <div class="sec-sum"><span>소계</span><b data-sub="etc">₩0</b></div>
+    </div>
+    <div class="toolbar reveal">
+      <div class="filters" data-filter-for="etc"></div>
+      <button class="add-btn" data-add="etc"><span>+</span> 항목 추가</button>
+    </div>
+    <div class="grid" data-list="etc"></div>
+  </section>
+
   <footer class="foot">
     <p>변경 사항은 이 브라우저에 저장됩니다 · 에누리 가격은 몇 시간마다 자동 갱신돼요.</p>
   </footer>
@@ -166,6 +183,7 @@
             <option value="interior">인테리어</option>
             <option value="electronics">전자제품</option>
             <option value="furniture">가구</option>
+            <option value="etc">기타</option>
           </select>
         </label>
       </div>
@@ -217,7 +235,7 @@
 <div class="tip" id="tip" role="tooltip"></div>
 <figure class="preview" id="preview" aria-hidden="true"><img alt=""><figcaption></figcaption></figure>
 
-<script src="app.js"></script>
-<script type="module" src="firebase.js"></script>
+<script src="app.js?v=6"></script>
+<script type="module" src="firebase.js?v=6"></script>
 </body>
 </html>

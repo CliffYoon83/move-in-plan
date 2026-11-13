@@ -1,7 +1,7 @@
 :root{
   --bg:#f6f1ea; --paper:#fffaf3; --card:#fffdf9; --ink:#2b2622; --ink2:#6f655b; --line:#e7ddd0;
   --accent:#b08d68; --accent2:#8a6a4a; --soft:#efe6da;
-  --c-interior:#b08d68; --c-electronics:#5c7a8a; --c-furniture:#8a9a6b;
+  --c-interior:#b08d68; --c-electronics:#5c7a8a; --c-furniture:#8a9a6b; --c-etc:#9b7e93;
   --consider:#c9893d; --done:#5b8a63; --confirmed:#3f5f7a;
   --door:#cbbfae; --top:#ece5da;
   --shadow:0 1px 2px rgba(60,40,20,.05),0 8px 30px rgba(60,40,20,.07);
@@ -305,20 +305,23 @@ details.lines tr.neg td:last-child{color:#b4553f}
 .dw .shelf{fill:#e7e1d7;stroke:#d3cbbf;stroke-width:2}
 .dw .ware{fill:#efe9df}
 .dw .ware2{fill:#cfc7ba}
-.dw .leaf{transform-box:fill-box;transition:transform .9s cubic-bezier(.65,0,.35,1);will-change:transform}
+.dw .leaf{transform-box:fill-box;transition:transform 1.6s cubic-bezier(.33,1,.68,1);will-change:transform}
 .dw .sw[data-hinge="left"] .leaf{transform-origin:left center}
 .dw .sw[data-hinge="right"] .leaf{transform-origin:right center}
 .dw .sw[data-hinge="top"] .leaf{transform-origin:center top}
-.dw .sw[data-hinge="slide"] .leaf{transform-origin:right center;transition-duration:1s}
+.dw .sw[data-hinge="slide"] .leaf{transform-origin:right center;transition-duration:1.3s}
 .dw .sw[data-hinge="left"]:not(.open):hover .leaf{transform:perspective(5000px) rotateY(-7deg)}
 .dw .sw[data-hinge="right"]:not(.open):hover .leaf{transform:perspective(5000px) rotateY(-7deg)}
 .dw .sw.open[data-hinge="left"] .leaf{transform:perspective(9000px) rotateY(-115deg)}
 .dw .sw.open[data-hinge="right"] .leaf{transform:perspective(9000px) rotateY(-115deg)}
-/* 90°를 지나는 순간 앞면 ↔ 안쪽 면 교체 (열 때 0.56s, 닫을 때 0.34s 지점) */
-.dw .face-f,.dw .face-b{transition:opacity 0s linear .34s}
+/* 90°를 지나는 순간 앞면 ↔ 안쪽 면 교체 (ease-out 1.6s 기준: 열 때 0.64s, 닫을 때 0.12s 지점) */
+.dw .face-f,.dw .face-b{transition:opacity 0s linear .12s}
 .dw .face-b{opacity:0}
-.dw .sw.open .face-b{opacity:1;transition-delay:.56s}
-.dw .sw.open[data-hinge="left"] .face-f,.dw .sw.open[data-hinge="right"] .face-f{opacity:0;transition-delay:.56s}
+.dw .sw.open .face-b{opacity:1;transition-delay:.64s}
+.dw .sw.open[data-hinge="left"] .face-f,.dw .sw.open[data-hinge="right"] .face-f{opacity:0;transition-delay:.64s}
+/* 문 안쪽은 처음엔 어둡다가 문이 열리는 만큼 서서히 밝아짐 */
+.dw .in-dim{fill:#2a2420;opacity:.6;transition:opacity .5s ease}
+.dw .inside.open .in-dim{opacity:0;transition:opacity 1.5s cubic-bezier(.5,0,.5,1)}
 .dw .sw .mod:hover{filter:none}
 .dw .sw.open[data-hinge="top"] .leaf{transform:perspective(6000px) rotateX(78deg)}
 .dw .sw.open[data-hinge="slide"] .leaf{transform:scaleX(.07)}

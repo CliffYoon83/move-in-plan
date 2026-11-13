@@ -15,6 +15,7 @@ const CATS = {
   interior:    { name: '인테리어', color: 'var(--c-interior)',    hex: '#b08d68' },
   electronics: { name: '전자제품', color: 'var(--c-electronics)', hex: '#5c7a8a' },
   furniture:   { name: '가구',     color: 'var(--c-furniture)',   hex: '#8a9a6b' },
+  etc:         { name: '기타',     color: 'var(--c-etc)',         hex: '#9b7e93' },
 };
 const STATUS = {
   considering: '고려중',
@@ -42,7 +43,8 @@ const SPEC = {
 /* ---------------- default data ---------------- */
 function defaults() {
   return {
-    version: 3,
+    version: 4,
+    flags: { etcSeeded: true },
     colors: { door: '#cbbfae', top: '#ece5da' },
     items: [
       // ---------- 인테리어 ----------
@@ -99,6 +101,7 @@ function defaults() {
       { id: uid(), cat: 'furniture', name: '소파', status: 'considering', model: '', store: '', link: '', note: '', price: null },
       { id: uid(), cat: 'furniture', name: '침대', status: 'considering', model: '', store: '', link: '', note: '', price: null },
       { id: uid(), cat: 'furniture', name: 'TV장식장', status: 'considering', model: '', store: '', link: '', note: '', price: null },
+      ...ETC_ITEMS.map(name => ({ id: uid(), cat: 'etc', name, status: 'considering', model: '', store: '', link: '', note: '', price: null })),
     ],
   };
 }
@@ -129,8 +132,26 @@ function migrate(st) {
   st.version = 2;
   migrate3(st);
 }
+const ETC_ITEMS = ['이사 신청', '입주 청소', '전구 교체', '인덕션 교체', '홈 버튼 교체', '인터넷 TV 설치'];
+function ensureEtc(st) {
+  let added = false;
+  for (const name of ETC_ITEMS) {
+    if (!st.items.some(i => i.name === name)) {
+      st.items.push({ id: uid(), cat: 'etc', name, status: 'considering', model: '', store: '', link: '', note: '', price: null });
+      added = true;
+    }
+  }
+  st.flags = { ...(st.flags || {}), etcSeeded: true };
+  return added;
+}
+function migrate4(st) {
+  if ((st.version || 1) >= 4) return;
+  ensureEtc(st);
+  st.version = 4;
+  store.set(LS_KEY, st);
+}
 function migrate3(st) {
-  if ((st.version || 1) >= 3) return;
+  if ((st.version || 1) >= 3) return migrate4(st);
   for (const it of st.items) {
     for (const k in SPEC) {
       if ((it.model || '').includes(SPEC[k].code) && !it.features) it.features = SPEC[k].features;
@@ -144,7 +165,7 @@ function migrate3(st) {
     }
   }
   st.version = 3;
-  store.set(LS_KEY, st);
+  migrate4(st);
 }
 
 let state = store.get(LS_KEY);
@@ -155,7 +176,8 @@ let live = store.get(LS_LIVE) || {};
 const save = () => { store.set(LS_KEY, state); pushCloud(); };
 
 /* ---------------- cloud (Firebase) sync ---------------- */
-const sync = { on: false, user: null, remote: new Map(), metaJSON: '', seeded: false, loaded: false };
+const sync = { on: false, user: null, remote: new Map(), metaJSON: '', seeded: false, loaded: false, metaLoaded: false };
+const metaOf = st => ({ colors: st.colors, flags: st.flags || {} });
 const stable = o => JSON.stringify(o, Object.keys(o).sort());
 const cleanItem = (it, order) => JSON.parse(JSON.stringify({ ...it, order })); // undefined 제거
 function canEdit() {
@@ -178,8 +200,8 @@ function pushCloud(force = false) {
     if (sync.remote.get(d.id) !== j) { upserts.push(d); sync.remote.set(d.id, j); }
   });
   for (const id of [...sync.remote.keys()]) if (!seen.has(id)) { deletes.push(id); sync.remote.delete(id); }
-  const metaJ = JSON.stringify(state.colors);
-  const meta = metaJ !== sync.metaJSON ? { colors: state.colors } : null;
+  const metaJ = JSON.stringify(metaOf(state));
+  const meta = metaJ !== sync.metaJSON ? metaOf(state) : null;
   if (meta) sync.metaJSON = metaJ;
   if (!upserts.length && !deletes.length && !meta) return;
   setSyncState('saving');
@@ -220,6 +242,7 @@ window.addEventListener('cloud:auth', e => {
   renderAuth();
   setSyncState(sync.user ? 'ok' : 'view');
   if (sync.user && sync.loaded && !sync.remote.size && !sync.seeded) seedCloud();
+  else if (sync.user && maybeSeedEtc()) renderAll();
 });
 window.addEventListener('cloud:items', e => {
   const { items, fromCache } = e.detail;
@@ -233,17 +256,29 @@ window.addEventListener('cloud:items', e => {
   items.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
   sync.remote = new Map(items.map(it => [it.id, stable(it)]));
   state.items = items.map(({ order, ...it }) => it);
+  maybeSeedEtc();
   store.set(LS_KEY, state);
   if (editing) editing = state.items.find(i => i.id === editing.id) || editing;
   renderAll();
   setSyncState(sync.user ? 'ok' : 'view');
 });
 window.addEventListener('cloud:meta', e => {
-  if (e.detail?.colors) {
-    sync.metaJSON = JSON.stringify(e.detail.colors);
-    state.colors = e.detail.colors; store.set(LS_KEY, state); applyColors();
-  }
+  const d = e.detail || {};
+  sync.metaLoaded = true;
+  sync.remoteEtc = !!d.flags?.etcSeeded;
+  if (d.colors) state.colors = d.colors;
+  state.flags = d.flags || {};
+  sync.metaJSON = JSON.stringify(metaOf(state));
+  store.set(LS_KEY, state); applyColors();
+  if (maybeSeedEtc()) renderAll();
 });
+// 공유 데이터에 '기타' 항목이 아직 없으면 한 번만 추가 (지운 뒤 다시 생기지 않도록 flags.etcSeeded 사용)
+function maybeSeedEtc() {
+  if (!sync.loaded || !sync.metaLoaded || sync.remoteEtc) return false;
+  const added = ensureEtc(state);               // 보기 전용이면 화면에만 표시
+  if (sync.user) { sync.remoteEtc = true; pushCloud(); }
+  return added;
+}
 window.addEventListener('cloud:error', e => {
   console.warn('cloud', e.detail);
   if (e.detail.where === 'init') { sync.on = false; setSyncState('local'); renderAuth(); }
@@ -364,10 +399,11 @@ function renderDashboard() {
 }
 
 /* ---------------- cards ---------------- */
-const filters = { interior: 'all', electronics: 'all', furniture: 'all' };
+const filters = { interior: 'all', electronics: 'all', furniture: 'all', etc: 'all' };
 
 function renderFilters(cat) {
   const box = $(`[data-filter-for="${cat}"]`);
+  if (!box) return;
   const items = state.items.filter(i => i.cat === cat);
   const cnt = s => items.filter(i => s === 'all' || i.status === s).length;
   box.innerHTML = [['all', '전체'], ...STATUS_ORDER.map(s => [s, STATUS[s]])]
@@ -425,6 +461,7 @@ function cardHTML(it, i) {
 
 function renderList(cat) {
   const box = $(`[data-list="${cat}"]`);
+  if (!box) return;
   const items = state.items.filter(i => i.cat === cat && (filters[cat] === 'all' || i.status === filters[cat]));
   box.innerHTML = items.length
     ? items.map(cardHTML).join('')
@@ -847,6 +884,7 @@ function inside(x, y, w, h, kind = 'shelf') {
     }
   }
   s += `<rect x="${x}" y="${y}" width="${w}" height="${Math.min(120, h * .25)}" fill="url(#topShade)"/>`;
+  s += `<rect class="in-dim" x="${x}" y="${y}" width="${w}" height="${h}"/>`;
   return s;
 }
 
@@ -936,7 +974,7 @@ function sinkSVG() {
   for (let k = 0; k < 7; k++) streams += `<line x1="${SPX - 66 + k * 22}" y1="${SY + 16}" x2="${SPX - 66 + k * 22}" y2="${CT}" style="animation-delay:${-k * 0.13}s"/>`;
   s += `<g class="sink hot" data-act="toggle" data-tip="백조 깜포르테 860 · 폭포수전 — 눌러서 물 틀기">
     <rect class="fill" x="1560" y="${CT - 6}" width="640" height="10" fill="url(#steel)" style="--d:2s"/>
-    <g class="fill" style="--d:2.1s">
+    <g class="fill faucet" style="--d:2.1s" data-tip="하츠 TS-100 폭포수전 — 눌러서 물 틀기">
       <rect x="${SPX - 22}" y="${CT - 300}" width="44" height="300" rx="6" fill="url(#steel)" stroke="#8d8a86" stroke-width="3"/>
       <rect x="${SPX - 90}" y="${SY}" width="180" height="18" rx="4" fill="url(#steel)" stroke="#8d8a86" stroke-width="3"/>
       <rect x="${SPX + 22}" y="${CT - 260}" width="60" height="12" rx="6" fill="#8d8a86"/>
@@ -1004,7 +1042,7 @@ function planSVG() {
         <text x="${DX}" y="${DY + 8}" text-anchor="middle" font-size="20" fill="#8a8884" font-weight="600" letter-spacing="1">Camforte</text>
       </g>
     </g>
-    <g class="fill" style="--d:${nd()}s" data-tip="폭포수전">
+    <g class="fill" style="--d:${nd()}s" data-tip="하츠 TS-100 폭포수전 — 눌러서 물 틀기">
       <rect x="${DX - 40}" y="18" width="80" height="58" rx="12" fill="url(#steel)" stroke="#7d7b77" stroke-width="4"/>
       <rect x="${DX - 80}" y="68" width="160" height="64" rx="8" fill="url(#steel)" stroke="#7d7b77" stroke-width="4"/>
       <rect x="${DX - 70}" y="120" width="140" height="10" rx="4" fill="#6f6d69"/>
@@ -1228,11 +1266,11 @@ const SPECS = {
   sink: [
     ['규격', 'ㄱ자 2960 × 1570'], ['도어', '영림 듄 선셋 스톤'], ['상판', '한스톤 크레모사'],
     ['벽체', '크레모사 2560'], ['조명', 'T5 간접 + 라인조명'], ['싱크볼', '백조 깜포르테 860'],
-    ['수전', '폭포수전'], ['보조주방', '1060 × 650'], ['타일', '300×600 덧방'], ['로봇청소기', '키큰장 하부 150'],
+    ['수전', '하츠 TS-100 폭포수전'], ['보조주방', '1060 × 650'], ['타일', '300×600 덧방'], ['로봇청소기', '키큰장 하부 150'],
   ],
   plan: [
     ['주방', '2960 (D 600)'], ['페닌슐라', '1570 × 720'], ['보조주방', '1060 × 650 (ㄱ자)'],
-    ['인덕션', '3구'], ['싱크볼', '백조 깜포르테 860'], ['상판 길이', '2960 / 1570 / 1160'], ['로봇청소기', '키큰장 하부'],
+    ['인덕션', '3구'], ['싱크볼', '백조 깜포르테 860'], ['수전', '하츠 TS-100'], ['상판 길이', '2960 / 1570 / 1160'], ['로봇청소기', '키큰장 하부'],
   ],
   builtin: [
     ['규격', '3220 × 855'], ['구성', '980 · 915/805 · 450'], ['내부', 'ㄱ자 팬트리장'], ['조명', 'H5 조명'],
@@ -1268,7 +1306,10 @@ $('#stage').addEventListener('click', e => {
       sw.parentNode.appendChild(sw);     // 열리는 문을 다른 문들 위로
       void sw.getBoundingClientRect();   // 이동 후 스타일 확정 → 전환 애니메이션 유지
     }
-    requestAnimationFrame(() => sw.classList.toggle('open'));
+    requestAnimationFrame(() => {
+      const on = sw.classList.toggle('open');
+      sw.closest('svg').querySelector(`.inside[data-k="${sw.dataset.k}"]`)?.classList.toggle('open', on);
+    });
   }
   else if (t.dataset.act === 'robot') { t.classList.remove('go'); void t.getBoundingClientRect(); t.classList.add('go'); }
 });
@@ -1332,7 +1373,7 @@ const secObs = new IntersectionObserver(es => {
     }
   });
 }, { rootMargin: '-45% 0px -50% 0px' });
-['interior', 'electronics', 'furniture'].forEach(id => secObs.observe(document.getElementById(id)));
+['interior', 'electronics', 'furniture', 'etc'].forEach(id => { const el = document.getElementById(id); if (el) secObs.observe(el); });
 secObs.observe($('.hero'));
 
 // reveal on scroll
