@@ -1035,10 +1035,16 @@ function sinkSVG() {
   s += swing(2510, UT, 450, 1070, 'right', '키큰장 450', inside(2510, UT, 450, 1070, 'tall'));
   s += swing(2510, UT + 1070, 450, RB - UT - 1070, 'right', '키큰장 450', inside(2510, UT + 1070, 450, RB - UT - 1070, 'tall'), grip(2510, UT + 1070, 450));
   s += `<rect class="fill" x="2510" y="${RB}" width="450" height="150" fill="color-mix(in srgb,var(--ink) 10%,transparent)" style="--d:1.2s"/>`;
-  s += `<g class="robot hot" data-act="robot" data-tip="로봇청소기 · 키큰장 하부 150 띄움 — 눌러보기">
-    <rect x="2575" y="${FL - 105}" width="320" height="95" rx="40" fill="#2f2c2a"/>
-    <rect x="2600" y="${FL - 118}" width="270" height="22" rx="11" fill="#55504b"/>
-    <circle cx="2850" cy="${FL - 60}" r="10" fill="#7fd6a0"/>
+  s += `<g class="robot hot" data-act="robot" data-tip="로봇청소기 · 드리미 L10s Ultra Heat · 키큰장 하부 150 띄움 — 눌러보기">
+    <ellipse cx="2735" cy="${FL - 4}" rx="185" ry="8" fill="#000" opacity=".18"/>
+    <circle cx="2595" cy="${FL - 12}" r="12" fill="#2b2b2b"/><circle cx="2875" cy="${FL - 12}" r="12" fill="#2b2b2b"/>
+    <rect x="2560" y="${FL - 94}" width="350" height="80" rx="34" fill="#f6f6f4" stroke="#c4c4c0" stroke-width="3"/>
+    <rect x="2562" y="${FL - 58}" width="346" height="16" rx="8" fill="#3a3a3a"/>
+    <rect x="2575" y="${FL - 88}" width="320" height="10" rx="5" fill="#fff" opacity=".8"/>
+    <rect x="2688" y="${FL - 120}" width="94" height="30" rx="12" fill="#f6f6f4" stroke="#c4c4c0" stroke-width="3"/>
+    <rect x="2690" y="${FL - 110}" width="90" height="10" fill="#2f2f2f"/>
+    <circle cx="2860" cy="${FL - 76}" r="6" fill="#4da3ff"/>
+    <path d="M2560 ${FL - 22} l-28 10 m28 -6 l-22 16" stroke="#9a9a96" stroke-width="4" stroke-linecap="round"/>
   </g>`;
 
   // 상판
@@ -1154,9 +1160,13 @@ function planSVG() {
   </g>`;
 
   // 로봇청소기 (키큰장 하부)
-  s += `<g class="robot-plan hot" data-act="robot" data-tip="로봇청소기 · 키큰장 하부 150 띄움 — 눌러보기">
-    <circle cx="2735" cy="310" r="165" fill="#2f2c2a" fill-opacity=".85" stroke="#2f2c2a" stroke-width="4" stroke-dasharray="18 12"/>
-    <circle cx="2735" cy="250" r="34" fill="#55504b"/><circle cx="2800" cy="380" r="12" fill="#7fd6a0"/>
+  s += `<g class="robot-plan hot" data-act="robot" data-tip="로봇청소기 · 드리미 L10s Ultra Heat · 키큰장 하부 150 띄움 — 눌러보기">
+    <circle cx="2735" cy="310" r="172" fill="#f6f6f4" stroke="#55504b" stroke-width="5" stroke-dasharray="20 12"/>
+    <path d="M2600 205 A172 172 0 0 1 2870 205" fill="none" stroke="#3a3a3a" stroke-width="14" stroke-linecap="round"/>
+    <circle cx="2735" cy="250" r="50" fill="#f6f6f4" stroke="#bdbdb9" stroke-width="4"/>
+    <circle cx="2735" cy="250" r="34" fill="#2f2f2f"/><circle cx="2735" cy="250" r="14" fill="#5a5a5a"/>
+    <rect x="2700" y="360" width="70" height="16" rx="8" fill="#d9d9d5"/><circle cx="2735" cy="400" r="9" fill="#4da3ff"/>
+    <path d="M2590 190 l-40 -26 M2590 190 l-46 -2 M2590 190 l-30 -38" stroke="#9a9a96" stroke-width="5" stroke-linecap="round"/>
   </g>`;
 
   // 라벨 (가려지지 않게 상판 밖 아래쪽으로)
@@ -1362,11 +1372,11 @@ const SPECS = {
   sink: [
     ['규격', 'ㄱ자 2960 × 1570'], ['도어', '한솔 포그 그레이'], ['상판', '칸스톤 크레모사'],
     ['벽체', '크레모사 2560'], ['조명', 'T5 간접 + 라인조명'], ['싱크볼', '백조 깜포르테 860'],
-    ['수전', '하츠 TS-100 폭포수전'], ['보조주방', '1060 × 650'], ['타일', '300×600 덧방'], ['로봇청소기', '키큰장 하부 150'],
+    ['수전', '하츠 TS-100 폭포수전'], ['보조주방', '1060 × 650'], ['타일', '300×600 덧방'], ['로봇청소기', '드리미 L10s Ultra Heat · 키큰장 하부 150'],
   ],
   plan: [
     ['주방', '2960 (D 600)'], ['페닌슐라', '1570 × 720 · 식기세척기'], ['보조주방', '1060 × 650 (ㄱ자)'],
-    ['인덕션', '3구'], ['싱크볼', '백조 깜포르테 860'], ['수전', '하츠 TS-100'], ['상판 길이', '2960 / 1570 / 1160'], ['로봇청소기', '키큰장 하부'],
+    ['인덕션', '3구'], ['싱크볼', '백조 깜포르테 860'], ['수전', '하츠 TS-100'], ['상판 길이', '2960 / 1570 / 1160'], ['로봇청소기', '드리미 L10s Ultra Heat'],
   ],
   builtin: [
     ['규격', '3220 × 855'], ['구성', '980 · 915/805 · 450'], ['내부', 'ㄱ자 팬트리장'], ['조명', 'H5 조명'],
