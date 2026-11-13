@@ -27,17 +27,22 @@ const uid = () => Math.random().toString(36).slice(2, 10);
 
 /* ---------------- product specs (사이즈 · 사진) ---------------- */
 const SPEC = {
-  fridge:     { code: 'RM70F64Q1A',     size: '912 × 1853 × 697 mm (W×H×D)', img: 'assets/products/fridge.jpg' },
-  kimchi:     { code: 'RK70F42M2A',     size: '799 × 1853 × 697 mm (W×H×D)', img: 'assets/products/kimchi.jpg' },
-  aircon:     { code: 'AN30CSU4P36SSY', size: '36평형 4실 (18+6+6+6평) · 실내기 1200×450×138 / 970×410×135 mm', img: 'assets/products/aircon.jpg' },
-  washer:     { code: 'WF80H21GDS',     size: '686 × 984 × 796 mm (W×H×D)', img: 'assets/products/washer.jpg' },
-  dishwasher: { code: 'DEE6EWE',        size: '598 × 815 × 567 mm (W×H×D)', img: 'assets/products/dishwasher.jpg' },
+  fridge:     { code: 'RM70F64Q1A',     size: '912 × 1853 × 697 mm (W×H×D)', img: 'assets/products/fridge.jpg',
+    features: ['총 623L (냉장 388L · 냉동 235L) · 4도어 · 에너지 1등급', '대용량 아이스메이커 · 큐브(각얼음) 자동 생성', 'AI 하이브리드 쿨링 · AI 절약모드', 'UV 위생 · 미세 자동정온'] },
+  kimchi:     { code: 'RK70F42M2A',     size: '799 × 1853 × 697 mm (W×H×D)', img: 'assets/products/kimchi.jpg',
+    features: ['420L · 4도어(3룸) · 에너지 2등급 · 김치통 6개', '독립냉각 · 메탈쿨링커튼 · 아삭모드', '발효숙성(물김치·무김치, 육류) · 다목적 맞춤보관(쌀, 야채, 와인 등)', 'AI 정온모드 · 구입김치 스캔보관 · Wi-Fi'] },
+  aircon:     { code: 'AN30CSU4P36SSY', size: '36평형 4실 (18+6+6+6평) · 실내기 1200×450×138 / 970×410×135 mm', img: 'assets/products/aircon.jpg',
+    features: ['무풍 간접냉방 · AI 판넬', '에너지 1등급 · 인버터 · Wi-Fi 내장', 'AI 운전 · AI 건조 · 열교환기 세척 · UV 팬살균', '스마트폰 제어 · 음성인식'] },
+  washer:     { code: 'WF80H21GDS',     size: '686 × 984 × 796 mm (W×H×D)', img: 'assets/products/washer.jpg',
+    features: ['세탁 21kg · 에너지 1등급 · 인버터 DD 모터', 'AI 세탁 · AI 진동소음 저감 · AI 에너지 절약', '버블워시 · 워터샷 · 스팀살균 · 빨래 추가', '무세제 통세척 · 다이얼 스크린 · 건조기 조작 연동'] },
+  dishwasher: { code: 'DEE6EWE',        size: '598 × 815 × 567 mm (W×H×D)', img: 'assets/products/dishwasher.jpg',
+    features: ['14인용 빌트인 · 에너지 1등급 · 스팀 살균', '건조: 자동문열림 · 열풍 · 응축', '3단 선반(높이조절) · 저소음 · 소량 부분세척', '내부조명 · 음성안내 · 스마트폰 제어'] },
 };
 
 /* ---------------- default data ---------------- */
 function defaults() {
   return {
-    version: 2,
+    version: 3,
     colors: { door: '#cbbfae', top: '#ece5da' },
     items: [
       // ---------- 인테리어 ----------
@@ -75,20 +80,19 @@ function defaults() {
       { id: uid(), cat: 'interior', name: '실링팬', status: 'considering', model: '', store: '', link: '', note: '고려중', price: null },
 
       // ---------- 전자제품 ----------
-      { id: uid(), cat: 'electronics', name: '냉장고', status: 'confirmed', model: '삼성 RM70F64Q1A · 키친핏 맥스 · 자동 각얼음', store: '삼성 패밀리넷', link: '', note: '', price: 2150000, size: SPEC.fridge.size, img: SPEC.fridge.img },
-      { id: uid(), cat: 'electronics', name: '김치냉장고', status: 'confirmed', model: '삼성 RK70F42M2A · 키친핏 맥스 · 4도어', store: '삼성 패밀리넷', link: '', note: '', price: 1700000, size: SPEC.kimchi.size, img: SPEC.kimchi.img },
+      { id: uid(), cat: 'electronics', name: '냉장고', status: 'confirmed', model: '삼성 RM70F64Q1A · 키친핏 맥스 · 자동 각얼음', store: '삼성 패밀리넷', link: '', note: '', price: 2150000, size: SPEC.fridge.size, img: SPEC.fridge.img, features: SPEC.fridge.features },
+      { id: uid(), cat: 'electronics', name: '김치냉장고', status: 'confirmed', model: '삼성 RK70F42M2A · 키친핏 맥스 · 4도어', store: '삼성 패밀리넷', link: '', note: '', price: 1700000, size: SPEC.kimchi.size, img: SPEC.kimchi.img, features: SPEC.kimchi.features },
       {
         id: uid(), cat: 'electronics', name: '시스템에어컨', status: 'confirmed',
-        model: '삼성 AN30CSU4P36SSY · 공청판넬 or AI판넬 옵션', store: '삼성 패밀리넷', link: '',
-        note: '3실 가격은 확인 후 입력하세요.', size: SPEC.aircon.size, img: SPEC.aircon.img,
-        options: [ { label: '4실', price: 5032000 }, { label: '3실', price: null } ], opt: 0,
+        model: '삼성 AN30CSU4P36SSY · 4실 · AI 판넬', store: '삼성 패밀리넷', link: '',
+        note: '', price: 5032000, size: SPEC.aircon.size, img: SPEC.aircon.img, features: SPEC.aircon.features,
       },
-      { id: uid(), cat: 'electronics', name: '세탁기', status: 'confirmed', model: '삼성 WF80H21GDS · 비스포크 AI 세탁기 21kg', store: '삼성 패밀리넷', link: '', note: '', price: 949000, size: SPEC.washer.size, img: SPEC.washer.img },
+      { id: uid(), cat: 'electronics', name: '세탁기', status: 'confirmed', model: '삼성 WF80H21GDS · 비스포크 AI 세탁기 21kg', store: '삼성 패밀리넷', link: '', note: '', price: 949000, size: SPEC.washer.size, img: SPEC.washer.img, features: SPEC.washer.features },
       {
         id: uid(), cat: 'electronics', name: '식기세척기', status: 'confirmed',
         model: 'LG 디오스 오브제컬렉션 DEE6EWE · 14인용 빌트인', store: '에누리 최저가',
         link: 'https://price.enuri.com/catalog/131321549', enuri: '131321549',
-        note: '', price: 1560940, size: SPEC.dishwasher.size, img: SPEC.dishwasher.img,
+        note: '', price: 1560940, size: SPEC.dishwasher.size, img: SPEC.dishwasher.img, features: SPEC.dishwasher.features,
       },
 
       // ---------- 가구 ----------
@@ -107,7 +111,7 @@ const store = {
 
 /* ---------------- migration (기존 저장 데이터 업데이트) ---------------- */
 function migrate(st) {
-  if ((st.version || 1) >= 2) return;
+  if ((st.version || 1) >= 2) return migrate3(st);
   for (const it of st.items) {
     if (it.note) it.note = it.note.replace('페닌슐라 하부 로봇청소기', '키큰장 하부 로봇청소기');
     (it.lines || []).forEach(l => { if (l.spec === '깜뽀르테 860') l.spec = '백조 깜포르테 860'; });
@@ -123,6 +127,23 @@ function migrate(st) {
     }
   }
   st.version = 2;
+  migrate3(st);
+}
+function migrate3(st) {
+  if ((st.version || 1) >= 3) return;
+  for (const it of st.items) {
+    for (const k in SPEC) {
+      if ((it.model || '').includes(SPEC[k].code) && !it.features) it.features = SPEC[k].features;
+    }
+    if ((it.model || '').includes('AN30CSU4P36SSY')) {
+      it.model = '삼성 AN30CSU4P36SSY · 4실 · AI 판넬';
+      const four = (it.options || []).find(o => o.label === '4실');
+      if (four) it.price = Number(four.price) || 5032000;
+      delete it.options; delete it.opt;
+      if (it.note === '3실 가격은 확인 후 입력하세요.') it.note = '';
+    }
+  }
+  st.version = 3;
   store.set(LS_KEY, st);
 }
 
@@ -131,7 +152,110 @@ if (!state || !Array.isArray(state.items)) state = defaults();
 state.colors ||= { door: '#cbbfae', top: '#ece5da' };
 migrate(state);
 let live = store.get(LS_LIVE) || {};
-const save = () => store.set(LS_KEY, state);
+const save = () => { store.set(LS_KEY, state); pushCloud(); };
+
+/* ---------------- cloud (Firebase) sync ---------------- */
+const sync = { on: false, user: null, remote: new Map(), metaJSON: '', seeded: false, loaded: false };
+const stable = o => JSON.stringify(o, Object.keys(o).sort());
+const cleanItem = (it, order) => JSON.parse(JSON.stringify({ ...it, order })); // undefined 제거
+function canEdit() {
+  if (!sync.on) return true;
+  if (sync.user) return true;
+  toast('수정하려면 로그인하세요', '로그인', () => window.cloud?.signIn().catch(authErr));
+  return false;
+}
+function authErr(e) {
+  if (e?.code === 'auth/popup-closed-by-user' || e?.code === 'auth/cancelled-popup-request') return;
+  toast(e?.code === 'auth/unauthorized-domain' ? '이 주소가 Firebase 승인 도메인에 없어요' : '로그인 실패: ' + (e?.code || e?.message));
+}
+function pushCloud(force = false) {
+  if (!sync.on || !sync.user || !window.cloud || (!sync.loaded && !force)) return;
+  const upserts = [], deletes = [], seen = new Set();
+  state.items.forEach((it, i) => {
+    const d = cleanItem(it, i);
+    const j = stable(d);
+    seen.add(d.id);
+    if (sync.remote.get(d.id) !== j) { upserts.push(d); sync.remote.set(d.id, j); }
+  });
+  for (const id of [...sync.remote.keys()]) if (!seen.has(id)) { deletes.push(id); sync.remote.delete(id); }
+  const metaJ = JSON.stringify(state.colors);
+  const meta = metaJ !== sync.metaJSON ? { colors: state.colors } : null;
+  if (meta) sync.metaJSON = metaJ;
+  if (!upserts.length && !deletes.length && !meta) return;
+  setSyncState('saving');
+  window.cloud.commit({ upserts, deletes, meta })
+    .then(() => setSyncState('ok'))
+    .catch(err => {
+      setSyncState('error');
+      toast(err.code === 'permission-denied' ? '이 계정은 수정 권한이 없어요. 변경이 저장되지 않았어요.' : '저장 실패: ' + err.message);
+      sync.remote.clear(); sync.metaJSON = ''; // 다음 스냅샷으로 원래 상태 복구
+    });
+}
+function setSyncState(s) {
+  const el = $('#syncPill'); if (!el) return;
+  const txt = {
+    local: '이 브라우저에만 저장 중', view: '보기 전용 · 로그인하면 함께 편집', ok: '실시간 공유 중',
+    saving: '저장 중…', error: '저장 실패 · 권한 확인 필요', offline: '연결 중…',
+  }[s];
+  el.dataset.state = s;
+  el.querySelector('b').textContent = txt;
+}
+function renderAuth() {
+  const b = $('#authBtn'); if (!b) return;
+  if (!sync.on) { b.hidden = true; return; }
+  b.hidden = false;
+  if (sync.user) {
+    b.innerHTML = sync.user.photo ? `<img src="${esc(sync.user.photo)}" alt="" referrerpolicy="no-referrer">` : `<span>${esc((sync.user.name || '?')[0])}</span>`;
+    b.title = `${sync.user.name || ''} (${sync.user.email}) · 눌러서 로그아웃`;
+    b.classList.add('in');
+  } else {
+    b.innerHTML = '<span class="g">G</span>로그인';
+    b.title = 'Google 계정으로 로그인';
+    b.classList.remove('in');
+  }
+}
+window.addEventListener('cloud:ready', () => { sync.on = true; setSyncState('offline'); renderAuth(); });
+window.addEventListener('cloud:auth', e => {
+  sync.user = e.detail;
+  renderAuth();
+  setSyncState(sync.user ? 'ok' : 'view');
+  if (sync.user && sync.loaded && !sync.remote.size && !sync.seeded) seedCloud();
+});
+window.addEventListener('cloud:items', e => {
+  const { items, fromCache } = e.detail;
+  if (!items.length) {
+    if (fromCache) return;
+    sync.loaded = true;
+    if (sync.user && !sync.seeded) seedCloud();
+    return; // 클라우드가 비어 있으면 로컬 데이터를 그대로 보여줌
+  }
+  sync.loaded = true;
+  items.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  sync.remote = new Map(items.map(it => [it.id, stable(it)]));
+  state.items = items.map(({ order, ...it }) => it);
+  store.set(LS_KEY, state);
+  if (editing) editing = state.items.find(i => i.id === editing.id) || editing;
+  renderAll();
+  setSyncState(sync.user ? 'ok' : 'view');
+});
+window.addEventListener('cloud:meta', e => {
+  if (e.detail?.colors) {
+    sync.metaJSON = JSON.stringify(e.detail.colors);
+    state.colors = e.detail.colors; store.set(LS_KEY, state); applyColors();
+  }
+});
+window.addEventListener('cloud:error', e => {
+  console.warn('cloud', e.detail);
+  if (e.detail.where === 'init') { sync.on = false; setSyncState('local'); renderAuth(); }
+  else if (e.detail.code === 'permission-denied') setSyncState('view');
+  else setSyncState('error');
+});
+function seedCloud() {
+  sync.seeded = true;
+  sync.remote.clear(); sync.metaJSON = '';
+  pushCloud(true);
+  toast('지금 데이터를 공유 저장소에 올렸어요');
+}
 
 /* ---------------- helpers ---------------- */
 const $ = (s, el = document) => el.querySelector(s);
@@ -288,6 +412,7 @@ function cardHTML(it, i) {
     ${opts}
     ${priceHTML}
     ${liveHTML}
+    ${it.features?.length ? `<ul class="features">${it.features.map(f => `<li>${esc(f)}</li>`).join('')}</ul>` : ''}
     ${meta ? `<div class="meta">${meta}</div>` : ''}
     ${it.note ? `<p class="note">${esc(it.note)}</p>` : ''}
     ${lines}
@@ -337,7 +462,7 @@ document.addEventListener('click', e => {
     return;
   }
   const add = e.target.closest('[data-add]');
-  if (add) { openModal(null, add.dataset.add); return; }
+  if (add) { if (canEdit()) openModal(null, add.dataset.add); return; }
 
   const btn = e.target.closest('[data-act]');
   const card = e.target.closest('.card');
@@ -345,6 +470,7 @@ document.addEventListener('click', e => {
   const it = state.items.find(i => i.id === card.dataset.id);
   if (!it) return;
   const act = btn.dataset.act;
+  if (['status', 'opt', 'edit', 'del'].includes(act) && !canEdit()) return;
   if (act === 'status') {
     it.status = STATUS_ORDER[(STATUS_ORDER.indexOf(it.status) + 1) % STATUS_ORDER.length];
     save();
@@ -366,9 +492,10 @@ document.addEventListener('click', e => {
 });
 
 function removeItem(it, card) {
-  const idx = state.items.indexOf(it);
   card.classList.add('leaving');
   setTimeout(() => {
+    const idx = state.items.findIndex(i => i.id === it.id);
+    if (idx < 0) return;
     state.items.splice(idx, 1); save(); renderList(it.cat); renderDashboard();
     toast(`'${it.name}' 삭제됨`, '되돌리기', () => {
       state.items.splice(idx, 0, it); save(); renderList(it.cat); renderDashboard();
@@ -404,6 +531,7 @@ function openModal(it, cat = 'interior') {
   form.note.value = v.note || '';
   form.size.value = v.size || '';
   form.img.value = v.img || '';
+  form.features.value = (v.features || []).join('\n');
   $('[data-rows="options"] .rows-list').innerHTML = (v.options || []).map(r => rowHTML('options', r)).join('');
   $('[data-rows="lines"] .rows-list').innerHTML = (v.lines || []).map(r => rowHTML('lines', r)).join('');
   $('#deleteBtn').style.visibility = it ? 'visible' : 'hidden';
@@ -449,22 +577,26 @@ form.addEventListener('submit', e => {
     note: form.note.value.trim(),
     size: form.size.value.trim() || undefined,
     img: form.img.value.trim() || undefined,
+    features: form.features.value.split('\n').map(x => x.trim()).filter(Boolean),
     options: options.length ? options : undefined,
     lines: lines.length ? lines : undefined,
   };
   if (data.enuri && !data.link) data.link = `https://price.enuri.com/catalog/${data.enuri}`;
   let it;
+  if (editing) editing = state.items.find(i => i.id === editing.id) || null;
   if (editing) {
     const oldCat = editing.cat;
     Object.assign(editing, data);
     if (!options.length) { delete editing.options; delete editing.opt; }
     else if ((editing.opt || 0) >= options.length) editing.opt = 0;
     if (!lines.length) delete editing.lines;
+    if (!data.features.length) delete editing.features;
     if (!data.enuri) delete editing.enuri;
     it = editing;
     if (oldCat !== it.cat) renderList(oldCat);
   } else {
     it = { id: uid(), ...data, opt: 0 };
+    if (!data.features.length) delete it.features;
     state.items.push(it);
   }
   save();
@@ -591,8 +723,12 @@ function applyColors() {
   $('#doorColor').value = state.colors.door;
   $('#topColor').value = state.colors.top;
 }
-$('#doorColor').addEventListener('input', e => { state.colors.door = e.target.value; applyColors(); save(); });
-$('#topColor').addEventListener('input', e => { state.colors.top = e.target.value; applyColors(); save(); });
+let colorT;
+const colorSave = () => { clearTimeout(colorT); colorT = setTimeout(save, 500); };
+$('#doorColor').addEventListener('input', e => { state.colors.door = e.target.value; applyColors(); colorSave(); });
+$('#topColor').addEventListener('input', e => { state.colors.top = e.target.value; applyColors(); colorSave(); });
+$('#doorColor').addEventListener('click', e => { if (!canEdit()) e.preventDefault(); });
+$('#topColor').addEventListener('click', e => { if (!canEdit()) e.preventDefault(); });
 
 /* ===========================================================
    Kitchen drawings (SVG, mm 단위) — 클릭하면 열리고 켜지는 인터랙션
@@ -1018,9 +1154,10 @@ menu.addEventListener('click', e => {
     link.click(); URL.revokeObjectURL(link.href);
     toast('JSON 파일로 내보냈어요');
   } else if (a === 'import') {
-    $('#importFile').click();
+    if (canEdit()) $('#importFile').click();
   } else if (a === 'reset') {
-    if (confirm('모든 변경 내용을 지우고 초기 데이터로 되돌릴까요?')) {
+    if (!canEdit()) return;
+    if (confirm(sync.on ? '함께 쓰는 데이터 전체를 초기 데이터로 되돌릴까요? 상대방 화면에도 바로 적용돼요.' : '모든 변경 내용을 지우고 초기 데이터로 되돌릴까요?')) {
       state = defaults(); save(); applyColors(); renderAll(); toast('초기 데이터로 되돌렸어요');
     }
   }
@@ -1059,7 +1196,14 @@ new IntersectionObserver(es => es.forEach(en => {
   if (en.isIntersecting && !drawn) { drawn = true; showView('sink'); }
 }), { threshold: 0.25 }).observe($('.showcase'));
 
+$('#authBtn').addEventListener('click', () => {
+  if (!window.cloud) return;
+  if (sync.user) { if (confirm('로그아웃할까요?')) window.cloud.signOut(); }
+  else window.cloud.signIn().catch(authErr);
+});
+
 /* ---------------- init ---------------- */
+setSyncState('local');
 applyColors();
 renderAll();
 requestAnimationFrame(moveInk);
