@@ -767,6 +767,7 @@ const DEFS = `<defs>
   <linearGradient id="bowlWall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a9a7a3"/><stop offset=".25" stop-color="#cfcdc9"/><stop offset="1" stop-color="#bdbbb7"/></linearGradient>
   <linearGradient id="bowlFloor" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d9d8d5"/><stop offset=".55" stop-color="#c9c7c3"/><stop offset="1" stop-color="#dedcd9"/></linearGradient>
   <radialGradient id="drainCover" cx=".42" cy=".38" r=".7"><stop offset="0" stop-color="#f6f6f4"/><stop offset=".6" stop-color="#d4d3d0"/><stop offset="1" stop-color="#a8a6a2"/></radialGradient>
+  <linearGradient id="panel" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#f6f5f2"/><stop offset=".55" stop-color="#eeede9"/><stop offset="1" stop-color="#e6e4e0"/></linearGradient>
   <radialGradient id="heat"><stop offset="0" stop-color="#ffb347"/><stop offset=".55" stop-color="#ff5a2a"/><stop offset="1" stop-color="#c81e0a" stop-opacity="0"/></radialGradient>
   <linearGradient id="waterG" x1="0" y1="0" x2="0" y2="1">
     <stop offset="0" stop-color="#d7eefa" stop-opacity=".95"/><stop offset="1" stop-color="#a9d6ee" stop-opacity=".55"/>
@@ -1064,22 +1065,43 @@ function fridgeInside(x, y, w, h, kind, top) {
 }
 
 function fridge(x, y, w, h, label, kind, delay) {
-  const g = 10, half = w / 2;
-  const top = kind === 'kimchi' ? h * 0.5 : h * 0.55;
-  const door = (dx, dy, dw, dh, side) => `<g class="fdoor" data-h="${side}">
-      <rect x="${dx}" y="${dy}" width="${dw}" height="${dh}" rx="5" fill="#f1efeb" stroke="#c9c5bf" stroke-width="3"/>
-      <rect x="${side === 'l' ? dx + dw - 16 : dx + 8}" y="${dy + 40}" width="8" height="${Math.min(260, dh - 80)}" rx="4" fill="#d6d2cc"/></g>`;
+  // 비스포크 키친핏 맥스 외관: 화이트 새틴 패널 + 블랙 가로 핸들 밴드 + 하단 다리
+  const B = 44, FEET = 34, GAP = 6, half = w / 2;
+  const top = kind === 'kimchi' ? h * 0.5 : h * 0.57;   // 상단 도어 높이 비율
+  const bodyB = y + h - FEET;
+  const panel = (dx, dy, dw, dh) => `<rect x="${dx}" y="${dy}" width="${dw}" height="${dh}" rx="4" fill="url(#panel)" stroke="#d6d3ce" stroke-width="2"/>
+    <rect x="${dx + 6}" y="${dy + 6}" width="${dw * 0.28}" height="${dh - 12}" rx="3" fill="#fff" opacity=".35"/>`;
+  const door = (dx, dy, dw, dh, side) => `<g class="fdoor" data-h="${side}">${panel(dx, dy, dw, dh)}</g>`;
+  const drawer = (dy, dh) => `<g class="fdrw">${panel(x + GAP, dy, w - GAP * 2, dh)}</g>`;
+  const band = (by) => `<rect x="${x}" y="${by}" width="${w}" height="${B}" fill="#1d1d1d"/>
+    <rect x="${x + 14}" y="${by + B - 12}" width="${w - 28}" height="5" rx="2" fill="#3a3a3a"/>`;
+  const feet = `<rect x="${x + 8}" y="${bodyB}" width="${w - 16}" height="${FEET - 8}" fill="#2a2a2a"/>
+    <rect x="${x + 30}" y="${y + h - 14}" width="60" height="14" rx="4" fill="#1a1a1a"/><rect x="${x + w - 90}" y="${y + h - 14}" width="60" height="14" rx="4" fill="#1a1a1a"/>`;
+  let fronts = '';
+  const t1 = y + top - B / 2;                // 상단 도어 하단
+  fronts += door(x + GAP, y + GAP, half - GAP * 1.5, t1 - y - GAP, 'l');
+  fronts += door(x + half + GAP / 2, y + GAP, half - GAP * 1.5, t1 - y - GAP, 'r');
+  let bands = band(t1);
+  if (kind === 'kimchi') {
+    const r0 = t1 + B, R = bodyB - r0 - B, dh = R / 2;
+    fronts += drawer(r0, dh - GAP / 2);
+    bands += band(r0 + dh - GAP / 2 + GAP / 2);
+    fronts += drawer(r0 + dh + B, bodyB - (r0 + dh + B) - GAP / 2);
+  } else {
+    const b0 = t1 + B;
+    fronts += door(x + GAP, b0, half - GAP * 1.5, bodyB - b0 - GAP / 2, 'l');
+    fronts += door(x + half + GAP / 2, b0, half - GAP * 1.5, bodyB - b0 - GAP / 2, 'r');
+  }
   const name = label.split(' · ')[0];
   return `<g class="slide-in" style="--d:${delay}s">
     <g class="frg hot" data-act="toggle" data-tip="${esc(label)} — 눌러서 열기">
-      <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="8" fill="#e9e6e1" stroke="var(--ink)" stroke-width="5"/>
-      <g class="fin">${fridgeInside(x, y, w, h, kind, top)}</g>
-      ${door(x + g, y + g, half - g * 1.5, top - g * 1.5, 'l')}
-      ${door(x + half + g / 2, y + g, half - g * 1.5, top - g * 1.5, 'r')}
-      ${door(x + g, y + top + g / 2, half - g * 1.5, h - top - g * 1.5, 'l')}
-      ${door(x + half + g / 2, y + top + g / 2, half - g * 1.5, h - top - g * 1.5, 'r')}
-      <g class="fname"><text class="lbl-s" x="${x + w / 2}" y="${y + top * 0.45}">${name}</text>
-      <text class="dim-t" x="${x + w / 2}" y="${y + top * 0.45 + 56}">${w}</text></g>
+      <rect x="${x}" y="${y}" width="${w}" height="${h - FEET + 4}" rx="6" fill="#1f1f1f"/>
+      <g class="fin">${fridgeInside(x, y, w, h - FEET, kind, top)}</g>
+      ${feet}
+      ${bands}
+      ${fronts}
+      <g class="fname"><text class="lbl-s" x="${x + w / 2}" y="${y + top * 0.45}" style="fill:#b5b0a8">${name}</text>
+      <text class="dim-t" x="${x + w / 2}" y="${y + top * 0.45 + 56}" style="fill:#c3beb6">${w}</text></g>
     </g>
   </g>`;
 }

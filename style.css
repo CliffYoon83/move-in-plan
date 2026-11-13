@@ -411,3 +411,6 @@ details.lines tr.neg td:last-child{color:#b4553f}
 .dw .frg.open .fin{opacity:1}
 .dw .frg .fname{transition:opacity .3s}
 .dw .frg.open .fname{opacity:0}
+
+.dw .fdrw{transform-box:fill-box;transform-origin:center bottom;transition:transform .85s cubic-bezier(.55,0,.2,1)}
+.dw .frg.open .fdrw{transform:perspective(7000px) rotateX(-86deg)}
