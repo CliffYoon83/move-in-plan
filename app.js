@@ -1029,7 +1029,7 @@ function planSVG() {
   // 주방 상판 + 키큰장 + 페닌슐라
   s += box(0, 0, 2510, 600, 'top', '주방 상판 2960 · 크레모사');
   s += box(2510, 0, 450, 600, 'door', '키큰장 450 · 하부 로봇청소기');
-  s += box(2240, 600, 720, 970, 'top', '페닌슐라');
+  s += box(2240, 600, 720, 970, 'top', '페닌슐라 · 식기세척기 설치 예정');
 
   // 인덕션 3구 (클릭하면 불)
   const burner = (cx, cy, r) => `<circle class="burn-glow" cx="${cx}" cy="${cy}" r="${r + 10}" fill="url(#heat)"/>
@@ -1085,7 +1085,7 @@ function planSVG() {
   // 라벨 (가려지지 않게 상판 밖 아래쪽으로)
   s += `<text class="lbl fill" x="560" y="690" style="--d:1.4s">인덕션 3구</text>`;
   s += `<text class="lbl fill" x="1880" y="690" style="--d:1.45s">싱크볼</text><text class="lbl-s fill" x="1880" y="760" style="--d:1.47s">백조 깜포르테 860</text>`;
-  s += `<text class="lbl fill" x="2600" y="1120" style="--d:1.5s">페닌슐라</text>`;
+  s += `<text class="lbl fill" x="2600" y="1070" style="--d:1.5s">식기세척기</text><text class="lbl fill" x="2600" y="1170" style="--d:1.52s">설치 예정</text>`;
   s += `<text class="lbl-s fill" x="2735" y="560" style="--d:1.5s">로봇청소기</text>`;
   D = 1.5;
   s += dimH(0, 2960, -130, '2960');
@@ -1288,7 +1288,7 @@ const SPECS = {
     ['수전', '하츠 TS-100 폭포수전'], ['보조주방', '1060 × 650'], ['타일', '300×600 덧방'], ['로봇청소기', '키큰장 하부 150'],
   ],
   plan: [
-    ['주방', '2960 (D 600)'], ['페닌슐라', '1570 × 720'], ['보조주방', '1060 × 650 (ㄱ자)'],
+    ['주방', '2960 (D 600)'], ['페닌슐라', '1570 × 720 · 식기세척기'], ['보조주방', '1060 × 650 (ㄱ자)'],
     ['인덕션', '3구'], ['싱크볼', '백조 깜포르테 860'], ['수전', '하츠 TS-100'], ['상판 길이', '2960 / 1570 / 1160'], ['로봇청소기', '키큰장 하부'],
   ],
   builtin: [
@@ -1310,6 +1310,9 @@ function showView(v) {
     stage.innerHTML = `<div><img src="assets/kitchen-render.jpg" alt="싱크대 예상 렌더링" loading="lazy"><p class="cap">이전 시안 렌더링 · 구조 참고용 (도면이 최신 기준, 마감재는 변경됨)</p></div>`;
   } else {
     stage.innerHTML = { sink: sinkSVG, plan: planSVG, builtin: builtinSVG }[v]() + `<p class="hint-chip"><span>👆</span>${HINTS[v]}</p>`;
+    const svg = stage.querySelector('svg');
+    clearTimeout(showView._t);
+    showView._t = setTimeout(() => svg.classList.add('settled'), 3200);
   }
   $('#specList').innerHTML = SPECS[v].map(([k, val]) => `<dt>${k}</dt><dd>${val}</dd>`).join('');
   $$('.show-tabs button').forEach(b => b.classList.toggle('on', b.dataset.view === v));
@@ -1321,6 +1324,7 @@ $('#stage').addEventListener('click', e => {
   if (t.dataset.act === 'toggle' || t.dataset.act === 'toggle-k') {
     const sw = t.dataset.act === 'toggle-k' ? t.closest('svg').querySelector(`.sw[data-k="${t.dataset.k}"]`) : t;
     if (!sw) return;
+    sw.closest('svg').classList.add('settled');   // 그리기 도중 클릭해도 문이 사라지지 않게
     if (!sw.classList.contains('open') && sw.matches('.sw[data-hinge="left"], .sw[data-hinge="right"]')) {
       // 이 문보다 뒤에 그려지는 '닫힌 채 멈춰 있는' 문들을 이 문 앞으로 옮겨서, 열린 문이 위에 보이게 함
       let n = sw.nextElementSibling;
@@ -1330,7 +1334,7 @@ $('#stage').addEventListener('click', e => {
     }
     const on = sw.classList.toggle('open');
     sw.classList.add('moving');
-    clearTimeout(sw._mv); sw._mv = setTimeout(() => sw.classList.remove('moving'), 1900);
+    clearTimeout(sw._mv); sw._mv = setTimeout(() => sw.classList.remove('moving'), on ? 1900 : 850);
     sw.closest('svg').querySelector(`.inside[data-k="${sw.dataset.k}"]`)?.classList.toggle('open', on);
   }
   else if (t.dataset.act === 'robot') { t.classList.remove('go'); void t.getBoundingClientRect(); t.classList.add('go'); }
