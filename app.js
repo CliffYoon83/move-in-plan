@@ -703,16 +703,31 @@ document.addEventListener('click', e => {
 addEventListener('scroll', () => previewFor && hidePreview(), { passive: true });
 
 const tip = $('#tip');
+// 도면 설명: '눌러서 열기/닫기/켜기…' 안내와 치수는 빼고 이름만 (예: '후드장 900 · 눌러서 열기' → '후드장')
+function drawingTip(txt) {
+  const keep = ['TS-100', '깜포르테 860'];
+  let t = txt;
+  keep.forEach((k, i) => { t = t.split(k).join(`@@${i}@@`); });
+  t = t.split(/\s*[·—]\s*/).filter(seg => !seg.includes('눌러')).join(' · ');
+  t = t.replace(/\(\s*\d[\d\s×x+.,]*\)/g, '')                                   // (2560) 같은 괄호 치수
+       .replace(/(^|[^A-Za-z0-9@-])\d{2,4}(\s*[×x]\s*\d{2,4})*(\s*mm)?(?![A-Za-z0-9@])/g, '$1') // 900, 1060 × 650
+       .replace(/\s{2,}/g, ' ')
+       .replace(/\s*·\s*(?=·|$)/g, '')
+       .replace(/^\s*·\s*/, '')
+       .trim();
+  keep.forEach((k, i) => { t = t.split(`@@${i}@@`).join(k); });
+  return t || txt;
+}
 let tipEl = null, tipT;
 document.addEventListener('pointermove', e => {
   const t = e.target.closest?.('[data-tip]');
   if (!t) { tip.classList.remove('show'); tipEl = null; clearTimeout(tipT); return; }
   if (t !== tipEl) {
     tipEl = t;
-    tip.textContent = t.dataset.tip;
+    tip.textContent = t.closest('#stage') ? drawingTip(t.dataset.tip) : t.dataset.tip;
     tip.classList.add('show');
     clearTimeout(tipT);
-    tipT = setTimeout(() => tip.classList.remove('show'), 3000); // 같은 곳에 3초 머물면 사라짐
+    tipT = setTimeout(() => tip.classList.remove('show'), 1000); // 같은 곳에 1초 머물면 사라짐
   }
   if (!tip.classList.contains('show')) return;
   const w = tip.offsetWidth;
