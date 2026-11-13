@@ -9,7 +9,7 @@
 
 const LS_KEY = 'moveplan.v1';
 const LS_LIVE = 'moveplan.live.v1';
-const LS_CHART = 'moveplan.chart.v1';
+const LS_CHART = 'moveplan.chart.v2';
 const LS_THEME = 'moveplan.theme';
 
 const CATS = {
@@ -756,11 +756,11 @@ document.addEventListener('pointermove', e => {
 });
 
 /* ---------------- Enuri live price ---------------- */
-// 일주일 최저가 추이 (에누리 일별 최저가 + 현재가)
+// 3개월 최저가 추이 (에누리 일별 최저가 + 현재가)
 function trendHTML(id) {
   const c = charts[id];
   if (!c?.pts?.length) return `<div class="trend empty">최저가 추이 불러오는 중…</div>`;
-  let pts = c.pts.slice(-8);
+  let pts = c.pts.slice(-92);
   if (live[id]?.price && live[id].at > (c.at || 0)) pts = [...pts.slice(0, -1), ['현재', live[id].price]];
   const W = 220, H = 46, PX = 6, PT = 8, PB = 14;
   const ys = pts.map(p => p[1]), lo = Math.min(...ys), hi = Math.max(...ys), span = hi - lo || 1;
@@ -770,10 +770,10 @@ function trendHTML(id) {
   const area = `${line}L${X(pts.length - 1).toFixed(1)} ${H - PB}L${X(0).toFixed(1)} ${H - PB}Z`;
   const kMin = ys.lastIndexOf(lo), kL = pts.length - 1;
   const first = ys[0], last = ys[kL], diff = last - first, gap = last - lo;
-  const weekTxt = diff === 0 ? '7일 전과 같음' : `7일 전보다 ${won(Math.abs(diff))} ${diff < 0 ? '내림' : '오름'}`;
-  const dots = pts.map((p, k) => `<circle cx="${X(k).toFixed(1)}" cy="${Y(p[1]).toFixed(1)}" r="7" fill="transparent"><title>${esc(p[0])} · ${won(p[1])}</title></circle>`).join('');
-  return `<div class="trend" title="에누리 최저가 · 최근 7일">
-    <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-label="최근 7일 최저가 추이">
+  const weekTxt = diff === 0 ? '3개월 전과 같음' : `3개월 전보다 ${won(Math.abs(diff))} ${diff < 0 ? '내림' : '오름'}`;
+  const dots = pts.map((p, k) => `<circle cx="${X(k).toFixed(1)}" cy="${Y(p[1]).toFixed(1)}" r="3" fill="transparent"><title>${esc(p[0])} · ${won(p[1])}</title></circle>`).join('');
+  return `<div class="trend" title="에누리 최저가 · 최근 3개월">
+    <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-label="최근 3개월 최저가 추이">
       <defs><linearGradient id="tg${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--accent2)" stop-opacity=".28"/><stop offset="1" stop-color="var(--accent2)" stop-opacity="0"/></linearGradient></defs>
       <path class="trend-area" d="${area}" fill="url(#tg${id})"/>
       <path class="trend-line" d="${line}" pathLength="1"/>
@@ -783,7 +783,7 @@ function trendHTML(id) {
       <text x="${W - PX}" y="${H - 2}" class="trend-x" text-anchor="end">${esc(pts[kL][0])}</text>
       ${dots}
     </svg>
-    <div class="trend-cap" title="${weekTxt}"><span>7일 최저 <b>${won(lo)}</b> <small>${esc(pts[kMin][0])}</small></span><span class="${gap > 0 ? 'up' : 'down'}">${gap > 0 ? `현재가 최저보다 +${won(gap)}` : '지금이 7일 최저가'}</span></div>
+    <div class="trend-cap" title="${weekTxt}"><span>3개월 최저 <b>${won(lo)}</b> <small>${esc(pts[kMin][0])}</small></span><span class="${gap > 0 ? 'up' : 'down'}">${gap > 0 ? `현재가 최저보다 +${won(gap)}` : '지금이 3개월 최저가'}</span></div>
   </div>`;
 }
 function setChart(id, data, at) {
@@ -792,7 +792,7 @@ function setChart(id, data, at) {
   return false;
 }
 async function fetchChart(id) {
-  const url = `https://price.enuri.com/api/product/catalog/lowest-price-chart?catalogNo=${id}&delivery=N&showType=1M`;
+  const url = `https://price.enuri.com/api/product/catalog/lowest-price-chart?catalogNo=${id}&delivery=N&showType=3M`;
   for (const p of PROXIES) {
     try {
       const ctl = new AbortController();
