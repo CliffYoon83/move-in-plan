@@ -46,7 +46,7 @@ function defaults() {
   return {
     version: 4,
     flags: { etcSeeded: true },
-    colors: { door: '#dcd3c6', top: '#e4dbcf' },
+    colors: { door: '#dcd3c6', top: '#e4dbcf', door2: '#e8e5df' },
     items: [
       // ---------- 인테리어 ----------
       {
@@ -196,7 +196,7 @@ function migrate3(st) {
 
 let state = store.get(LS_KEY);
 if (!state || !Array.isArray(state.items)) state = defaults();
-state.colors ||= { door: '#dcd3c6', top: '#e4dbcf' };
+state.colors ||= { door: '#dcd3c6', top: '#e4dbcf', door2: '#e8e5df' };
 migrate(state);
 if (fixStone(state) | fixDoorColor(state)) store.set(LS_KEY, state);
 let live = store.get(LS_LIVE) || {};
@@ -870,8 +870,11 @@ async function loadPrices() {
 function applyColors() {
   document.documentElement.style.setProperty('--door', state.colors.door);
   document.documentElement.style.setProperty('--top', state.colors.top);
+  state.colors.door2 ||= '#e8e5df';
+  document.documentElement.style.setProperty('--door2', state.colors.door2);
   $('#doorColor').value = state.colors.door;
   $('#topColor').value = state.colors.top;
+  $('#door2Color').value = state.colors.door2;
 }
 let colorT;
 const colorSave = () => { clearTimeout(colorT); colorT = setTimeout(save, 500); };
@@ -879,11 +882,25 @@ $('#doorColor').addEventListener('input', e => { state.colors.door = e.target.va
 $('#topColor').addEventListener('input', e => { state.colors.top = e.target.value; applyColors(); colorSave(); });
 $('#doorColor').addEventListener('click', e => { if (!canEdit()) e.preventDefault(); });
 $('#topColor').addEventListener('click', e => { if (!canEdit()) e.preventDefault(); });
+$('#door2Color').addEventListener('input', e => { state.colors.door2 = e.target.value; applyColors(); colorSave(); });
+$('#door2Color').addEventListener('click', e => { if (!canEdit()) e.preventDefault(); });
 
 /* ===========================================================
    Kitchen drawings (SVG, mm 단위) — 클릭하면 열리고 켜지는 인터랙션
    =========================================================== */
 const DEFS = `<defs>
+  <!-- 한솔 콜렉트스톤 라임베이지 (실제 질감 이미지, 색은 칩 색상을 따름) -->
+  <pattern id="limeT" patternUnits="userSpaceOnUse" width="906" height="1453"><rect width="906" height="1453" style="fill:var(--top)"/><image href="assets/lime-beige.jpg" width="906" height="1453" preserveAspectRatio="none" style="mix-blend-mode:luminosity"/></pattern>
+  <pattern id="limeD" patternUnits="userSpaceOnUse" width="906" height="1453"><rect width="906" height="1453" style="fill:var(--door)"/><image href="assets/lime-beige.jpg" width="906" height="1453" preserveAspectRatio="none" style="mix-blend-mode:luminosity"/></pattern>
+  <!-- 한솔 콘크리트화이트 (스톤 질감 필름) -->
+  <filter id="concN" x="0" y="0" width="100%" height="100%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.09" numOctaves="2" seed="5" stitchTiles="stitch" result="f"/>
+    <feTurbulence type="fractalNoise" baseFrequency="0.006" numOctaves="3" seed="9" stitchTiles="stitch" result="c"/>
+    <feColorMatrix in="f" values="0 0 0 0 .55  0 0 0 0 .54  0 0 0 0 .52  0 0 0 -.9 .42" result="fa"/>
+    <feColorMatrix in="c" values="0 0 0 0 .7  0 0 0 0 .69  0 0 0 0 .67  0 0 0 -.45 .24" result="ca"/>
+    <feMerge><feMergeNode in="ca"/><feMergeNode in="fa"/></feMerge>
+  </filter>
+  <pattern id="concD" patternUnits="userSpaceOnUse" width="600" height="600"><rect width="600" height="600" style="fill:var(--door2)"/><rect width="600" height="600" fill="#fff" filter="url(#concN)"/></pattern>
   <filter id="grain" x="0" y="0" width="100%" height="100%">
     <feTurbulence type="fractalNoise" baseFrequency="0.006 0.045" numOctaves="3" seed="7"/>
     <feColorMatrix values="0 0 0 0 .3  0 0 0 0 .3  0 0 0 0 .3  0 0 0 .2 -.06"/>
@@ -922,7 +939,7 @@ const DEFS = `<defs>
 
 let D = 0; // animation delay cursor
 const nd = (s = 0.06) => (D += s).toFixed(2);
-function box(x, y, w, h, cls = 'door', tip = '', tex = cls === 'top' ? 'marble' : '') {
+function box(x, y, w, h, cls = 'door', tip = '', tex = '') {
   const d = nd();
   const fd = (Number(d) + 0.45).toFixed(2);
   return `<g class="mod"${tip ? ` data-tip="${esc(tip)}"` : ''}>
@@ -1061,7 +1078,6 @@ function sinkSVG() {
   // 대리석 벽체 + T5 조명 (클릭하면 조명 켜짐)
   s += `<g class="bs hot" data-act="toggle" data-tip="세라믹 벽체 · 한솔 라임베이지 — 눌러서 T5 조명 켜기">
     <rect class="fill top" x="0" y="${UB}" width="2510" height="${CT - UB}" style="--d:.2s"/>
-    <rect class="fill" x="0" y="${UB}" width="2510" height="${CT - UB}" fill="#fff" filter="url(#marble)" style="--d:.2s"/>
     <rect class="wash" x="0" y="${UB}" width="2510" height="${CT - UB}" fill="url(#wash)"/>
     <rect class="t5g" x="40" y="${UB - 10}" width="2440" height="60" fill="#ffe7b0" filter="url(#soft)"/>
     <rect class="t5" x="50" y="${UB + 2}" width="2420" height="10" rx="5"/>
@@ -1527,9 +1543,11 @@ function builtinSVG() {
     <g class="leaf">${box(20, UT, 480, TK - UT, 'door')}${box(500, UT, 480, TK - UT, 'door')}
       <text class="lbl" x="500" y="1150">내부 ㄱ자 팬트리장</text></g>
   </g>`;
-  // 브릿지장 (플랩 도어)
-  s += swing(980, UT, 915, 400, 'top', '브릿지장 915', inside(980, UT, 915, 400, 'upper'));
-  s += swing(1895, UT, 805, 400, 'top', '브릿지장 805', inside(1895, UT, 805, 400, 'upper'));
+  // 브릿지장 (양여닫이: 좌·우로 열림)
+  s += swing(980, UT, 457.5, 400, 'left', '브릿지장 915 (좌)', inside(980, UT, 457.5, 400, 'upper'));
+  s += swing(1437.5, UT, 457.5, 400, 'right', '브릿지장 915 (우)', inside(1437.5, UT, 457.5, 400, 'upper'));
+  s += swing(1895, UT, 402.5, 400, 'left', '브릿지장 805 (좌)', inside(1895, UT, 402.5, 400, 'upper'));
+  s += swing(2297.5, UT, 402.5, 400, 'right', '브릿지장 805 (우)', inside(2297.5, UT, 402.5, 400, 'upper'));
   // 냉장고 자리
   s += `<rect class="fill" x="980" y="${UT + 400}" width="1720" height="${FL - UT - 400}" fill="color-mix(in srgb,var(--ink) 6%,transparent)" style="--d:.9s"/>`;
   s += ol(`M980 ${UT + 400}V${FL}M2700 ${UT + 400}V${FL}`, '0.9');
@@ -1561,7 +1579,7 @@ function builtinSVG() {
   s += dimH(0, 3220, -170, '3220');
   s += dimH(-165, 20, FL + 110, '165', false);
   s += dimV(3290, NT, NB, `${NB - NT}`);
-  return withInteriors(`<svg class="dw" viewBox="-300 -260 3700 2800" role="img" aria-label="냉장고장 정면도">${s}</svg>`);
+  return withInteriors(`<svg class="dw bi" viewBox="-300 -260 3700 2800" role="img" aria-label="냉장고장 정면도">${s}</svg>`);
 }
 
 const SPECS = {
@@ -1576,7 +1594,7 @@ const SPECS = {
   ],
   builtin: [
     ['규격', '3220 × 855'], ['구성', '980 · 915/805 · 450'], ['내부', 'ㄱ자 팬트리장'], ['조명', 'H5 조명'],
-    ['슬라이드장', '밥솥 수납'], ['냉장고', 'RM70F64Q1A (912)'], ['김치냉장고', 'RK70F42M2A (799)'], ['도어', '한솔 라임 베이지'],
+    ['슬라이드장', '밥솥 수납'], ['냉장고', 'RM70F64Q1A (912)'], ['김치냉장고', 'RK70F42M2A (799)'], ['도어', '한솔 콘크리트화이트'], ['브릿지장', '양여닫이']
   ],
   render: [['안내', '이전 시안 렌더링'], ['기준', '최신 도면 우선'], ['상판', '라임베이지로 변경'], ['도어', '라임 베이지로 변경']],
 };
@@ -1666,7 +1684,7 @@ $('#importFile').addEventListener('change', async e => {
   try {
     const j = JSON.parse(await f.text());
     if (!Array.isArray(j.items)) throw 0;
-    state = j; state.colors ||= { door: '#dcd3c6', top: '#e4dbcf' };
+    state = j; state.colors ||= { door: '#dcd3c6', top: '#e4dbcf', door2: '#e8e5df' };
     save(); applyColors(); renderAll(); toast('데이터를 불러왔어요');
   } catch { toast('올바른 JSON 파일이 아니에요'); }
   e.target.value = '';

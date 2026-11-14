@@ -3,7 +3,7 @@
   --accent:#b08d68; --accent2:#8a6a4a; --soft:#efe6da;
   --c-interior:#b08d68; --c-electronics:#5c7a8a; --c-furniture:#8a9a6b; --c-etc:#9b7e93;
   --consider:#c9893d; --done:#5b8a63; --confirmed:#e0322b;
-  --door:#dcd3c6; --top:#e4dbcf;
+  --door:#dcd3c6; --top:#e4dbcf; --door2:#e8e5df;
   --shadow:0 1px 2px rgba(60,40,20,.05),0 8px 30px rgba(60,40,20,.07);
   --r:18px;
   color-scheme:light;
@@ -127,8 +127,9 @@ h2{font-size:clamp(26px,3.2vw,36px);margin:0;letter-spacing:-.03em;font-weight:8
 .swatch:hover{background:var(--soft)}
 .swatch input{position:absolute;opacity:0;width:44px;height:44px;cursor:pointer}
 .chip{width:44px;height:44px;border-radius:12px;flex:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08),0 2px 8px rgba(0,0,0,.08);position:relative;overflow:hidden}
-.door-chip{background:var(--door)}
-.top-chip{background:var(--top)}
+.door-chip{background:var(--door) url(assets/lime-beige.jpg) center/180% auto;background-blend-mode:luminosity}
+.top-chip{background:var(--top) url(assets/lime-beige.jpg) center/180% auto;background-blend-mode:luminosity}
+.door2-chip{background:var(--door2)}
 .chip::after{content:"";position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='60' height='60' filter='url(%23n)' opacity='.18'/%3E%3C/svg%3E");mix-blend-mode:multiply}
 .swatch b{display:block;font-size:14px}
 .swatch small{font-size:12px;color:var(--ink2)}
@@ -140,8 +141,9 @@ h2{font-size:clamp(26px,3.2vw,36px);margin:0;letter-spacing:-.03em;font-weight:8
 /* SVG drawings */
 .dw .ol{fill:none;stroke:var(--ink);stroke-width:5;stroke-linejoin:round;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1.1s cubic-bezier(.6,0,.3,1) forwards;animation-delay:var(--d,0s)}
 .dw .fill{opacity:0;animation:fadeIn .6s ease forwards;animation-delay:var(--d,0s)}
-.dw .door{fill:var(--door)}
-.dw .top{fill:var(--top)}
+.dw .door{fill:url(#limeD)}
+.dw.bi .door{fill:url(#concD)}
+.dw .top{fill:url(#limeT)}
 .dw .wall{fill:color-mix(in srgb,var(--paper) 70%,var(--soft))}
 .dw .floor{fill:color-mix(in srgb,#d9bf98 55%,var(--paper))}
 .dw .dark{fill:#3a3532}
