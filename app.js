@@ -46,7 +46,7 @@ function defaults() {
   return {
     version: 4,
     flags: { etcSeeded: true },
-    colors: { door: '#dcd3c6', top: '#e4dbcf', door2: '#e8e5df' },
+    colors: { door: '#dcd3c6', top: '#e4dbcf', door2: '#ece6dc' },
     items: [
       // ---------- 인테리어 ----------
       {
@@ -196,7 +196,7 @@ function migrate3(st) {
 
 let state = store.get(LS_KEY);
 if (!state || !Array.isArray(state.items)) state = defaults();
-state.colors ||= { door: '#dcd3c6', top: '#e4dbcf', door2: '#e8e5df' };
+state.colors ||= { door: '#dcd3c6', top: '#e4dbcf', door2: '#ece6dc' };
 migrate(state);
 if (fixStone(state) | fixDoorColor(state)) store.set(LS_KEY, state);
 let live = store.get(LS_LIVE) || {};
@@ -869,18 +869,23 @@ async function loadPrices() {
 /* ---------------- 마감재 (면별 선택) ---------------- */
 const MATS = {
   lime: { label: '한솔 · 라임베이지', name: '한솔 콜렉트스톤 라임베이지', color: '#e2d9cd' },
-  cremosa: { label: '칸스톤 · 크레모사', name: '칸스톤 크레모사', color: '#ece5da' },
-  concrete: { label: '한솔 · 콘크리트화이트', name: '한솔 콘크리트화이트', color: '#e8e5df' },
+  cremosa: { label: '칸스톤 · 크레모사', name: '칸스톤 크레모사 K4510', color: '#dbd7cb' },
+  concrete: { label: '한솔 · 콘크리트화이트', name: '한솔 콘크리트화이트', color: '#ece6dc' },
   fog: { label: '한솔 · 포그 그레이', name: '한솔 포그 그레이', color: '#e6e5e1' },   // 이전보다 밝고 화이트한 톤, 무광 단색
 };
-const SURF = { door: { key: 'mDoor', def: 'lime' }, top: { key: 'mTop', def: 'lime' }, door2: { key: 'mDoor2', def: 'concrete' } };
-const matOf = sf => (MATS[state.colors?.[SURF[sf].key]] ? state.colors[SURF[sf].key] : SURF[sf].def);
+// 면별로 고를 수 있는 마감재: 크레모사는 상판·벽체 전용, 콘크리트화이트·포그 그레이는 도어 전용
+const SURF = {
+  door: { key: 'mDoor', def: 'lime', allow: ['lime', 'concrete', 'fog'] },
+  top: { key: 'mTop', def: 'lime', allow: ['lime', 'cremosa'] },
+  door2: { key: 'mDoor2', def: 'concrete', allow: ['lime', 'concrete', 'fog'] },
+};
+const matOf = sf => (SURF[sf].allow.includes(state.colors?.[SURF[sf].key]) ? state.colors[SURF[sf].key] : SURF[sf].def);
 const matName = sf => MATS[matOf(sf)].name;
 // 각 면의 패턴: 기본색(칩 색상) + 재질별 질감 레이어 (선택된 것만 CSS로 표시)
 const matPattern = k => `<pattern id="p${k}" patternUnits="userSpaceOnUse" width="906" height="1453">
     <rect width="906" height="1453" style="fill:var(--${k.toLowerCase()})"/>
     <image class="tx tx-lime" href="assets/lime-beige.jpg" width="906" height="1453" preserveAspectRatio="none" style="mix-blend-mode:luminosity"/>
-    <rect class="tx tx-cremosa" width="906" height="1453" fill="#fff" filter="url(#marble)"/>
+    <rect class="tx tx-cremosa" width="906" height="1453" fill="#fff" filter="url(#crem)"/>
     <rect class="tx tx-concrete" width="906" height="1453" fill="#fff" filter="url(#concN)"/>
   </pattern>`;
 
@@ -888,7 +893,9 @@ const matPattern = k => `<pattern id="p${k}" patternUnits="userSpaceOnUse" width
 function applyColors() {
   document.documentElement.style.setProperty('--door', state.colors.door);
   document.documentElement.style.setProperty('--top', state.colors.top);
-  state.colors.door2 ||= '#e8e5df';
+  state.colors.door2 ||= MATS.concrete.color;
+  for (const sf of ['door', 'door2']) if (matOf(sf) === 'concrete' && state.colors[sf] === '#e8e5df') state.colors[sf] = MATS.concrete.color;
+  if (matOf('top') === 'cremosa' && state.colors.top === '#ece5da') state.colors.top = MATS.cremosa.color;
   document.documentElement.style.setProperty('--door2', state.colors.door2);
   $('#doorColor').value = state.colors.door;
   $('#topColor').value = state.colors.top;
@@ -909,7 +916,7 @@ $('#topColor').addEventListener('click', e => { if (!canEdit()) e.preventDefault
 $('#door2Color').addEventListener('input', e => { state.colors.door2 = e.target.value; applyColors(); colorSave(); });
 $('#door2Color').addEventListener('click', e => { if (!canEdit()) e.preventDefault(); });
 $$('select.mat-sel').forEach(sel => {
-  sel.innerHTML = Object.entries(MATS).map(([k, m]) => `<option value="${k}">${m.label}</option>`).join('');
+  sel.innerHTML = SURF[sel.dataset.surf].allow.map(k => `<option value="${k}">${MATS[k].label}</option>`).join('');
   sel.value = matOf(sel.dataset.surf);
   sel.addEventListener('mousedown', e => { if (!canEdit()) e.preventDefault(); });
   sel.addEventListener('change', () => {
@@ -927,12 +934,23 @@ $$('select.mat-sel').forEach(sel => {
    =========================================================== */
 const DEFS = `<defs>
   <!-- 한솔 콘크리트화이트 (스톤 질감 필름) -->
+  <!-- 한솔 콘크리트화이트: 밝은 오프화이트 + 어두운/밝은 고운 점 입자 + 옅은 구름 -->
   <filter id="concN" x="0" y="0" width="100%" height="100%">
-    <feTurbulence type="fractalNoise" baseFrequency="0.09" numOctaves="2" seed="5" stitchTiles="stitch" result="f"/>
-    <feTurbulence type="fractalNoise" baseFrequency="0.006" numOctaves="3" seed="9" stitchTiles="stitch" result="c"/>
-    <feColorMatrix in="f" values="0 0 0 0 .55  0 0 0 0 .54  0 0 0 0 .52  0 0 0 -.9 .42" result="fa"/>
-    <feColorMatrix in="c" values="0 0 0 0 .7  0 0 0 0 .69  0 0 0 0 .67  0 0 0 -.45 .24" result="ca"/>
-    <feMerge><feMergeNode in="ca"/><feMergeNode in="fa"/></feMerge>
+    <feTurbulence type="fractalNoise" baseFrequency="0.11" numOctaves="1" seed="5" stitchTiles="stitch" result="d"/>
+    <feTurbulence type="fractalNoise" baseFrequency="0.13" numOctaves="1" seed="21" stitchTiles="stitch" result="l"/>
+    <feTurbulence type="fractalNoise" baseFrequency="0.005" numOctaves="3" seed="9" stitchTiles="stitch" result="c"/>
+    <feColorMatrix in="d" values="0 0 0 0 .6  0 0 0 0 .56  0 0 0 0 .5  5 0 0 0 -3.15" result="da"/>
+    <feColorMatrix in="l" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 .98  5 0 0 0 -3" result="la"/>
+    <feColorMatrix in="c" values="0 0 0 0 .62  0 0 0 0 .58  0 0 0 0 .52  0 0 0 -.4 .2" result="ca"/>
+    <feMerge><feMergeNode in="ca"/><feMergeNode in="la"/><feMergeNode in="da"/></feMerge>
+  </filter>
+  <!-- 칸스톤 크레모사 K4510: 크림 그레이지 + 가로 결의 밝은 줄 + 베이지 플렉 (트래버틴 느낌) -->
+  <filter id="crem" x="0" y="0" width="100%" height="100%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.0035 0.07" numOctaves="4" seed="4" stitchTiles="stitch" result="a"/>
+    <feTurbulence type="fractalNoise" baseFrequency="0.006 0.08" numOctaves="3" seed="12" stitchTiles="stitch" result="b"/>
+    <feColorMatrix in="a" values="0 0 0 0 1  0 0 0 0 .99  0 0 0 0 .96  1.7 0 0 0 -.93" result="aa"/>
+    <feColorMatrix in="b" values="0 0 0 0 .76  0 0 0 0 .7  0 0 0 0 .62  2.4 0 0 0 -1.38" result="bb"/>
+    <feMerge><feMergeNode in="bb"/><feMergeNode in="aa"/></feMerge>
   </filter>
 ${['Door', 'Top', 'Door2'].map(k => matPattern(k)).join('')}
   <filter id="grain" x="0" y="0" width="100%" height="100%">
@@ -1718,7 +1736,7 @@ $('#importFile').addEventListener('change', async e => {
   try {
     const j = JSON.parse(await f.text());
     if (!Array.isArray(j.items)) throw 0;
-    state = j; state.colors ||= { door: '#dcd3c6', top: '#e4dbcf', door2: '#e8e5df' };
+    state = j; state.colors ||= { door: '#dcd3c6', top: '#e4dbcf', door2: '#ece6dc' };
     save(); applyColors(); renderAll(); toast('데이터를 불러왔어요');
   } catch { toast('올바른 JSON 파일이 아니에요'); }
   e.target.value = '';

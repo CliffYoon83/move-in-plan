@@ -3,7 +3,7 @@
   --accent:#b08d68; --accent2:#8a6a4a; --soft:#efe6da;
   --c-interior:#b08d68; --c-electronics:#5c7a8a; --c-furniture:#8a9a6b; --c-etc:#9b7e93;
   --consider:#c9893d; --done:#5b8a63; --confirmed:#e0322b;
-  --door:#dcd3c6; --top:#e4dbcf; --door2:#e8e5df;
+  --door:#dcd3c6; --top:#e4dbcf; --door2:#ece6dc;
   --shadow:0 1px 2px rgba(60,40,20,.05),0 8px 30px rgba(60,40,20,.07);
   --r:18px;
   color-scheme:light;
@@ -498,6 +498,6 @@ details.lines tr.neg td:last-child{color:#b4553f}
 :root[data-m-door2="concrete"] #pDoor2 .tx-concrete{display:inline}
 .swatch .mat-sel{display:block;margin-top:3px;font:inherit;font-size:12px;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:3px 6px;cursor:pointer;max-width:100%}
 .chip[data-m="lime"]{background-image:url(assets/lime-beige.jpg);background-size:180% auto;background-blend-mode:luminosity}
-.chip[data-m="cremosa"]{background-image:linear-gradient(118deg,transparent 30%,rgba(140,120,100,.28) 33%,transparent 37%),linear-gradient(62deg,transparent 58%,rgba(140,120,100,.2) 61%,transparent 65%)}
+.chip[data-m="cremosa"]{background-image:repeating-linear-gradient(178deg,transparent 0 5px,rgba(255,255,250,.55) 5px 6px,transparent 6px 9px,rgba(170,150,125,.25) 9px 10px)}
 .chip[data-m="lime"]::after,.chip[data-m="fog"]::after,.chip[data-m="cremosa"]::after{display:none}
 .chip[data-m="concrete"]::after{display:block}
