@@ -866,6 +866,24 @@ async function loadPrices() {
   }
 }
 
+/* ---------------- 마감재 (면별 선택) ---------------- */
+const MATS = {
+  lime: { label: '한솔 · 라임베이지', name: '한솔 콜렉트스톤 라임베이지', color: '#e2d9cd' },
+  cremosa: { label: '칸스톤 · 크레모사', name: '칸스톤 크레모사', color: '#ece5da' },
+  concrete: { label: '한솔 · 콘크리트화이트', name: '한솔 콘크리트화이트', color: '#e8e5df' },
+  fog: { label: '한솔 · 포그 그레이', name: '한솔 포그 그레이', color: '#e6e5e1' },   // 이전보다 밝고 화이트한 톤, 무광 단색
+};
+const SURF = { door: { key: 'mDoor', def: 'lime' }, top: { key: 'mTop', def: 'lime' }, door2: { key: 'mDoor2', def: 'concrete' } };
+const matOf = sf => (MATS[state.colors?.[SURF[sf].key]] ? state.colors[SURF[sf].key] : SURF[sf].def);
+const matName = sf => MATS[matOf(sf)].name;
+// 각 면의 패턴: 기본색(칩 색상) + 재질별 질감 레이어 (선택된 것만 CSS로 표시)
+const matPattern = k => `<pattern id="p${k}" patternUnits="userSpaceOnUse" width="906" height="1453">
+    <rect width="906" height="1453" style="fill:var(--${k.toLowerCase()})"/>
+    <image class="tx tx-lime" href="assets/lime-beige.jpg" width="906" height="1453" preserveAspectRatio="none" style="mix-blend-mode:luminosity"/>
+    <rect class="tx tx-cremosa" width="906" height="1453" fill="#fff" filter="url(#marble)"/>
+    <rect class="tx tx-concrete" width="906" height="1453" fill="#fff" filter="url(#concN)"/>
+  </pattern>`;
+
 /* ---------------- colors ---------------- */
 function applyColors() {
   document.documentElement.style.setProperty('--door', state.colors.door);
@@ -875,6 +893,12 @@ function applyColors() {
   $('#doorColor').value = state.colors.door;
   $('#topColor').value = state.colors.top;
   $('#door2Color').value = state.colors.door2;
+  for (const sf of Object.keys(SURF)) {
+    const m = matOf(sf);
+    document.documentElement.dataset['m' + sf[0].toUpperCase() + sf.slice(1)] = m;
+    $(`.chip[data-surf="${sf}"]`)?.setAttribute('data-m', m);
+    const sel = $(`select[data-surf="${sf}"]`); if (sel) sel.value = m;
+  }
 }
 let colorT;
 const colorSave = () => { clearTimeout(colorT); colorT = setTimeout(save, 500); };
@@ -884,14 +908,24 @@ $('#doorColor').addEventListener('click', e => { if (!canEdit()) e.preventDefaul
 $('#topColor').addEventListener('click', e => { if (!canEdit()) e.preventDefault(); });
 $('#door2Color').addEventListener('input', e => { state.colors.door2 = e.target.value; applyColors(); colorSave(); });
 $('#door2Color').addEventListener('click', e => { if (!canEdit()) e.preventDefault(); });
+$$('select.mat-sel').forEach(sel => {
+  sel.innerHTML = Object.entries(MATS).map(([k, m]) => `<option value="${k}">${m.label}</option>`).join('');
+  sel.value = matOf(sel.dataset.surf);
+  sel.addEventListener('mousedown', e => { if (!canEdit()) e.preventDefault(); });
+  sel.addEventListener('change', () => {
+    if (!canEdit()) { applyColors(); return; }
+    const sf = sel.dataset.surf;
+    state.colors[SURF[sf].key] = sel.value;
+    state.colors[sf] = MATS[sel.value].color;   // 재질 기본색으로 (칩으로 미세 조정 가능)
+    applyColors(); colorSave();
+    const v = $('.show-tabs button.on')?.dataset.view; if (v) showView(v);
+  });
+});
 
 /* ===========================================================
    Kitchen drawings (SVG, mm 단위) — 클릭하면 열리고 켜지는 인터랙션
    =========================================================== */
 const DEFS = `<defs>
-  <!-- 한솔 콜렉트스톤 라임베이지 (실제 질감 이미지, 색은 칩 색상을 따름) -->
-  <pattern id="limeT" patternUnits="userSpaceOnUse" width="906" height="1453"><rect width="906" height="1453" style="fill:var(--top)"/><image href="assets/lime-beige.jpg" width="906" height="1453" preserveAspectRatio="none" style="mix-blend-mode:luminosity"/></pattern>
-  <pattern id="limeD" patternUnits="userSpaceOnUse" width="906" height="1453"><rect width="906" height="1453" style="fill:var(--door)"/><image href="assets/lime-beige.jpg" width="906" height="1453" preserveAspectRatio="none" style="mix-blend-mode:luminosity"/></pattern>
   <!-- 한솔 콘크리트화이트 (스톤 질감 필름) -->
   <filter id="concN" x="0" y="0" width="100%" height="100%">
     <feTurbulence type="fractalNoise" baseFrequency="0.09" numOctaves="2" seed="5" stitchTiles="stitch" result="f"/>
@@ -900,15 +934,15 @@ const DEFS = `<defs>
     <feColorMatrix in="c" values="0 0 0 0 .7  0 0 0 0 .69  0 0 0 0 .67  0 0 0 -.45 .24" result="ca"/>
     <feMerge><feMergeNode in="ca"/><feMergeNode in="fa"/></feMerge>
   </filter>
-  <pattern id="concD" patternUnits="userSpaceOnUse" width="600" height="600"><rect width="600" height="600" style="fill:var(--door2)"/><rect width="600" height="600" fill="#fff" filter="url(#concN)"/></pattern>
+${['Door', 'Top', 'Door2'].map(k => matPattern(k)).join('')}
   <filter id="grain" x="0" y="0" width="100%" height="100%">
     <feTurbulence type="fractalNoise" baseFrequency="0.006 0.045" numOctaves="3" seed="7"/>
     <feColorMatrix values="0 0 0 0 .3  0 0 0 0 .3  0 0 0 0 .3  0 0 0 .2 -.06"/>
     <feComposite in2="SourceGraphic" operator="in"/>
   </filter>
   <filter id="marble" x="0" y="0" width="100%" height="100%">
-    <feTurbulence type="fractalNoise" baseFrequency="0.004 0.02" numOctaves="4" seed="3"/>
-    <feColorMatrix values="0 0 0 0 .5  0 0 0 0 .44  0 0 0 0 .38  0 0 0 -0.45 0.26"/>
+    <feTurbulence type="fractalNoise" baseFrequency="0.0016 0.012" numOctaves="4" seed="3" stitchTiles="stitch"/>
+    <feColorMatrix values="0 0 0 0 .45  0 0 0 0 .4  0 0 0 0 .34  0 0 0 -0.9 0.5"/>
     <feComposite in2="SourceGraphic" operator="in"/>
   </filter>
   <filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="14"/></filter>
@@ -1076,7 +1110,7 @@ function sinkSVG() {
   s += solid(-120, FL, 3200, 40, 'floor', 0);
 
   // 대리석 벽체 + T5 조명 (클릭하면 조명 켜짐)
-  s += `<g class="bs hot" data-act="toggle" data-tip="세라믹 벽체 · 한솔 라임베이지 — 눌러서 T5 조명 켜기">
+  s += `<g class="bs hot" data-act="toggle" data-tip="벽체 · ${esc(matName('top'))} — 눌러서 T5 조명 켜기">
     <rect class="fill top" x="0" y="${UB}" width="2510" height="${CT - UB}" style="--d:.2s"/>
     <rect class="wash" x="0" y="${UB}" width="2510" height="${CT - UB}" fill="url(#wash)"/>
     <rect class="t5g" x="40" y="${UB - 10}" width="2440" height="60" fill="#ffe7b0" filter="url(#soft)"/>
@@ -1131,7 +1165,7 @@ function sinkSVG() {
   </g>`;
 
   // 상판
-  s += box(0, CT, 2510, SLAB, 'top', '상판 · 한솔 콜렉트스톤 라임베이지');
+  s += box(0, CT, 2510, SLAB, 'top', '상판 · ' + matName('top'));
 
   // 하부장
   s += box(0, BT, 50, TK - BT, 'door', '필러 FA 50');
@@ -1193,7 +1227,7 @@ function planSVG() {
   s += box(-700, 720, 650, 1060, 'top', '보조주방 1060 × 650 · 상부장 X');
   s += `<text class="lbl fill" x="-375" y="1230" style="--d:1.2s">보조주방</text><text class="lbl-s fill" x="-375" y="1310" style="--d:1.25s">1060 × 650</text>`;
   // 주방 상판 + 키큰장 + 페닌슐라
-  s += box(0, 0, 2510, 600, 'top', '주방 상판 2960 · 라임베이지');
+  s += box(0, 0, 2510, 600, 'top', '주방 상판 2960 · ' + matName('top'));
   s += box(2510, 0, 450, 600, 'door', '키큰장 450 · 하부 로봇청소기');
   s += box(2240, 600, 720, 970, 'top', '페닌슐라 · 식기세척기 설치 예정');
 
@@ -1584,8 +1618,8 @@ function builtinSVG() {
 
 const SPECS = {
   sink: [
-    ['규격', 'ㄱ자 2960 × 1570'], ['도어', '한솔 라임 베이지'], ['상판', '한솔 콜렉트스톤 라임베이지'],
-    ['벽체', '라임베이지 2560'], ['조명', 'T5 간접 + 라인조명'], ['싱크볼', '백조 깜포르테 860+'],
+    ['규격', 'ㄱ자 2960 × 1570'], ['도어', '%door%'], ['상판', '%top%'],
+    ['벽체', '%top% · 2560'], ['조명', 'T5 간접 + 라인조명'], ['싱크볼', '백조 깜포르테 860+'],
     ['수전', '하츠 TS-100 폭포수전'], ['보조주방', '1060 × 650'], ['타일', '300×600 덧방'], ['로봇청소기', '드리미 L10s Ultra Heat · 키큰장 하부 150'],
   ],
   plan: [
@@ -1594,12 +1628,12 @@ const SPECS = {
   ],
   builtin: [
     ['규격', '3220 × 855'], ['구성', '980 · 915/805 · 450'], ['내부', 'ㄱ자 팬트리장'], ['조명', 'H5 조명'],
-    ['슬라이드장', '밥솥 수납'], ['냉장고', 'RM70F64Q1A (912)'], ['김치냉장고', 'RK70F42M2A (799)'], ['도어', '한솔 콘크리트화이트'], ['브릿지장', '양여닫이']
+    ['슬라이드장', '밥솥 수납'], ['냉장고', 'RM70F64Q1A (912)'], ['김치냉장고', 'RK70F42M2A (799)'], ['도어', '%door2%'], ['브릿지장', '양여닫이']
   ],
-  render: [['안내', '이전 시안 렌더링'], ['기준', '최신 도면 우선'], ['상판', '라임베이지로 변경'], ['도어', '라임 베이지로 변경']],
+  render: [['안내', '이전 시안 렌더링'], ['기준', '최신 도면 우선'], ['상판', '현재 %top%'], ['도어', '현재 %door%']],
 };
 const HINTS = {
-  sink: '도어 · 서랍 · 레인지후드 · 세라믹 벽체(조명) · 싱크볼(물) · 로봇청소기를 눌러보세요',
+  sink: '도어 · 서랍 · 레인지후드 · 벽체(조명) · 싱크볼(물) · 로봇청소기를 눌러보세요',
   plan: '인덕션(불) · 싱크볼(물) · 식기세척기 · 로봇청소기를 눌러보세요',
   builtin: 'ㄱ자 팬트리장 · 냉장고 · 김치냉장고 · 브릿지장 · 밥솥 슬라이드장을 눌러보세요',
   render: '',
@@ -1615,7 +1649,7 @@ function showView(v) {
     clearTimeout(showView._t);
     showView._t = setTimeout(() => svg.classList.add('settled'), 3200);
   }
-  $('#specList').innerHTML = SPECS[v].map(([k, val]) => `<dt>${k}</dt><dd>${val}</dd>`).join('');
+  $('#specList').innerHTML = SPECS[v].map(([k, val]) => `<dt>${k}</dt><dd>${val.replace(/%(door2|door|top)%/g, (_, sf) => matName(sf))}</dd>`).join('');
   $$('.show-tabs button').forEach(b => b.classList.toggle('on', b.dataset.view === v));
   moveInk();
 }
