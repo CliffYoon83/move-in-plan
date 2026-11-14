@@ -46,12 +46,12 @@ function defaults() {
   return {
     version: 4,
     flags: { etcSeeded: true },
-    colors: { door: '#dedcd7', top: '#ece5da' },
+    colors: { door: '#dcd3c6', top: '#e4dbcf' },
     items: [
       // ---------- 인테리어 ----------
       {
         id: uid(), cat: 'interior', name: '싱크대', status: 'confirmed',
-        model: 'ㄱ자 2960 × 1570 · 도어 한솔 포그 그레이 · 상판 칸스톤 크레모사',
+        model: 'ㄱ자 2960 × 1570 · 도어 한솔 라임 베이지 · 상판 한솔 콜렉트스톤 라임베이지',
         store: '(주)한솔홈', link: '',
         note: '최신 도면 기준. 비규격장, T5 간접조명.\n보조주방 상부장 없음 · 키큰장 하부 로봇청소기 150 띄움.',
         lines: [
@@ -147,7 +147,7 @@ function ensureEtc(st) {
 }
 const OLD_STONE = String.fromCharCode(0xD55C, 0xC2A4, 0xD1A4); // 이전 표기
 const SINK_RE = /깜포르테 860(?!\+)/g;
-const TEXT_FIX = [[OLD_STONE, '칸스톤'], ['영림 듄 선셋'.concat(' 스톤'), '한솔 포그 그레이']];
+const TEXT_FIX = [[OLD_STONE, '칸스톤'], ['영림 듄 선셋'.concat(' 스톤'), '한솔 포그 그레이'], ['한솔 포그 그레이', '한솔 라임 베이지'], ['칸스톤 크레모사', '한솔 콜렉트스톤 라임베이지']];
 function fixStone(st) {
   let changed = false;
   for (const it of st.items) for (const f of ['model', 'note']) {
@@ -161,12 +161,12 @@ function fixStone(st) {
   }
   return changed;
 }
-const OLD_DOOR = '#cbbfae', NEW_DOOR = '#dedcd7';
+const NEW_DOOR = '#dcd3c6', NEW_TOP = '#e4dbcf';
 function fixDoorColor(st) {
-  // 도어재 변경(포그 그레이) 시 한 번만 색상 교체 — 이후 사용자가 칩으로 고른 색은 유지
-  if (st.flags?.doorFinish === 'fog-gray-2') return false;
-  st.colors = { ...(st.colors || {}), door: NEW_DOOR };
-  st.flags = { ...(st.flags || {}), doorFinish: 'fog-gray-2' };
+  // 마감재 변경(한솔 라임 베이지) 시 한 번만 색상 교체 — 이후 사용자가 칩으로 고른 색은 유지
+  if (st.flags?.doorFinish === 'lime-beige-1') return false;
+  st.colors = { ...(st.colors || {}), door: NEW_DOOR, top: NEW_TOP };
+  st.flags = { ...(st.flags || {}), doorFinish: 'lime-beige-1' };
   return true;
 }
 function migrate4(st) {
@@ -196,7 +196,7 @@ function migrate3(st) {
 
 let state = store.get(LS_KEY);
 if (!state || !Array.isArray(state.items)) state = defaults();
-state.colors ||= { door: '#dedcd7', top: '#ece5da' };
+state.colors ||= { door: '#dcd3c6', top: '#e4dbcf' };
 migrate(state);
 if (fixStone(state) | fixDoorColor(state)) store.set(LS_KEY, state);
 let live = store.get(LS_LIVE) || {};
@@ -890,8 +890,8 @@ const DEFS = `<defs>
     <feComposite in2="SourceGraphic" operator="in"/>
   </filter>
   <filter id="marble" x="0" y="0" width="100%" height="100%">
-    <feTurbulence type="fractalNoise" baseFrequency="0.0016 0.012" numOctaves="4" seed="3"/>
-    <feColorMatrix values="0 0 0 0 .45  0 0 0 0 .4  0 0 0 0 .34  0 0 0 -0.9 0.5"/>
+    <feTurbulence type="fractalNoise" baseFrequency="0.004 0.02" numOctaves="4" seed="3"/>
+    <feColorMatrix values="0 0 0 0 .5  0 0 0 0 .44  0 0 0 0 .38  0 0 0 -0.45 0.26"/>
     <feComposite in2="SourceGraphic" operator="in"/>
   </filter>
   <filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="14"/></filter>
@@ -1059,7 +1059,7 @@ function sinkSVG() {
   s += solid(-120, FL, 3200, 40, 'floor', 0);
 
   // 대리석 벽체 + T5 조명 (클릭하면 조명 켜짐)
-  s += `<g class="bs hot" data-act="toggle" data-tip="대리석 벽체 · 크레모사 — 눌러서 T5 조명 켜기">
+  s += `<g class="bs hot" data-act="toggle" data-tip="세라믹 벽체 · 한솔 라임베이지 — 눌러서 T5 조명 켜기">
     <rect class="fill top" x="0" y="${UB}" width="2510" height="${CT - UB}" style="--d:.2s"/>
     <rect class="fill" x="0" y="${UB}" width="2510" height="${CT - UB}" fill="#fff" filter="url(#marble)" style="--d:.2s"/>
     <rect class="wash" x="0" y="${UB}" width="2510" height="${CT - UB}" fill="url(#wash)"/>
@@ -1115,7 +1115,7 @@ function sinkSVG() {
   </g>`;
 
   // 상판
-  s += box(0, CT, 2510, SLAB, 'top', '상판 · 칸스톤 크레모사');
+  s += box(0, CT, 2510, SLAB, 'top', '상판 · 한솔 콜렉트스톤 라임베이지');
 
   // 하부장
   s += box(0, BT, 50, TK - BT, 'door', '필러 FA 50');
@@ -1177,7 +1177,7 @@ function planSVG() {
   s += box(-700, 720, 650, 1060, 'top', '보조주방 1060 × 650 · 상부장 X');
   s += `<text class="lbl fill" x="-375" y="1230" style="--d:1.2s">보조주방</text><text class="lbl-s fill" x="-375" y="1310" style="--d:1.25s">1060 × 650</text>`;
   // 주방 상판 + 키큰장 + 페닌슐라
-  s += box(0, 0, 2510, 600, 'top', '주방 상판 2960 · 크레모사');
+  s += box(0, 0, 2510, 600, 'top', '주방 상판 2960 · 라임베이지');
   s += box(2510, 0, 450, 600, 'door', '키큰장 450 · 하부 로봇청소기');
   s += box(2240, 600, 720, 970, 'top', '페닌슐라 · 식기세척기 설치 예정');
 
@@ -1566,8 +1566,8 @@ function builtinSVG() {
 
 const SPECS = {
   sink: [
-    ['규격', 'ㄱ자 2960 × 1570'], ['도어', '한솔 포그 그레이'], ['상판', '칸스톤 크레모사'],
-    ['벽체', '크레모사 2560'], ['조명', 'T5 간접 + 라인조명'], ['싱크볼', '백조 깜포르테 860+'],
+    ['규격', 'ㄱ자 2960 × 1570'], ['도어', '한솔 라임 베이지'], ['상판', '한솔 콜렉트스톤 라임베이지'],
+    ['벽체', '라임베이지 2560'], ['조명', 'T5 간접 + 라인조명'], ['싱크볼', '백조 깜포르테 860+'],
     ['수전', '하츠 TS-100 폭포수전'], ['보조주방', '1060 × 650'], ['타일', '300×600 덧방'], ['로봇청소기', '드리미 L10s Ultra Heat · 키큰장 하부 150'],
   ],
   plan: [
@@ -1576,12 +1576,12 @@ const SPECS = {
   ],
   builtin: [
     ['규격', '3220 × 855'], ['구성', '980 · 915/805 · 450'], ['내부', 'ㄱ자 팬트리장'], ['조명', 'H5 조명'],
-    ['슬라이드장', '밥솥 수납'], ['냉장고', 'RM70F64Q1A (912)'], ['김치냉장고', 'RK70F42M2A (799)'], ['도어', '한솔 포그 그레이'],
+    ['슬라이드장', '밥솥 수납'], ['냉장고', 'RM70F64Q1A (912)'], ['김치냉장고', 'RK70F42M2A (799)'], ['도어', '한솔 라임 베이지'],
   ],
-  render: [['안내', '이전 시안 렌더링'], ['기준', '최신 도면 우선'], ['상판', '크레모사로 변경'], ['도어', '포그 그레이로 변경']],
+  render: [['안내', '이전 시안 렌더링'], ['기준', '최신 도면 우선'], ['상판', '라임베이지로 변경'], ['도어', '라임 베이지로 변경']],
 };
 const HINTS = {
-  sink: '도어 · 서랍 · 레인지후드 · 대리석 벽체(조명) · 싱크볼(물) · 로봇청소기를 눌러보세요',
+  sink: '도어 · 서랍 · 레인지후드 · 세라믹 벽체(조명) · 싱크볼(물) · 로봇청소기를 눌러보세요',
   plan: '인덕션(불) · 싱크볼(물) · 식기세척기 · 로봇청소기를 눌러보세요',
   builtin: 'ㄱ자 팬트리장 · 냉장고 · 김치냉장고 · 브릿지장 · 밥솥 슬라이드장을 눌러보세요',
   render: '',
@@ -1666,7 +1666,7 @@ $('#importFile').addEventListener('change', async e => {
   try {
     const j = JSON.parse(await f.text());
     if (!Array.isArray(j.items)) throw 0;
-    state = j; state.colors ||= { door: '#dedcd7', top: '#ece5da' };
+    state = j; state.colors ||= { door: '#dcd3c6', top: '#e4dbcf' };
     save(); applyColors(); renderAll(); toast('데이터를 불러왔어요');
   } catch { toast('올바른 JSON 파일이 아니에요'); }
   e.target.value = '';

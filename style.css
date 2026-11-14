@@ -3,7 +3,7 @@
   --accent:#b08d68; --accent2:#8a6a4a; --soft:#efe6da;
   --c-interior:#b08d68; --c-electronics:#5c7a8a; --c-furniture:#8a9a6b; --c-etc:#9b7e93;
   --consider:#c9893d; --done:#5b8a63; --confirmed:#e0322b;
-  --door:#dedcd7; --top:#ece5da;
+  --door:#dcd3c6; --top:#e4dbcf;
   --shadow:0 1px 2px rgba(60,40,20,.05),0 8px 30px rgba(60,40,20,.07);
   --r:18px;
   color-scheme:light;
@@ -480,4 +480,4 @@ details.lines tr.neg td:last-child{color:#b4553f}
 .dw.settled .slide-in{animation:none;opacity:1;transform:none}
 .dw.settled .insides,.dw.settled .sw>.inside,.dw.settled .drw .dbox{animation:none;visibility:visible}
 
-.door-chip::after{display:none}  /* 포그 그레이: 무늬 없는 단색 */
+.door-chip::after{display:none}  /* 라임 베이지: 무늬 없는 단색 */
